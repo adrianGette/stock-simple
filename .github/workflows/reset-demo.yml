@@ -1,0 +1,44 @@
+name: Resetear demo
+
+# La demo pública comparte cuentas entre todos los visitantes. Cada madrugada se vuelven a
+# cargar los datos de ejemplo, así cualquier cambio (precios, ventas anuladas…) se limpia solo
+# y el tablero siempre tiene ventas "de hoy".
+on:
+  schedule:
+    - cron: "0 7 * * *" # 04:00 en Argentina (UTC-3)
+  workflow_dispatch: # también se puede correr a mano desde la pestaña Actions
+
+concurrency:
+  group: reset-demo
+  cancel-in-progress: false
+
+jobs:
+  reset:
+    name: Recargar datos de demo en Neon
+    runs-on: ubuntu-latest
+    # Los forks del repo no tienen el secreto: el workflow solo corre en el original.
+    if: github.repository == 'adrianGette/stock-simple'
+    permissions:
+      contents: read
+    env:
+      DATABASE_URL: ${{ secrets.DEMO_DATABASE_URL }}
+    steps:
+      - name: Verificar el secreto
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Falta el secreto DEMO_DATABASE_URL (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build:shared
+      - run: npx prisma generate
+        working-directory: apps/api
+      - name: Aplicar migraciones pendientes
+        run: npm run db:deploy -w @stock/api
+      - name: Cargar datos de demo (borra los anteriores)
+        run: npm run db:seed -w @stock/api
