@@ -92,7 +92,18 @@ export class AuthService {
 
   async me(userId: string): Promise<AuthUser> {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: userWithBusiness })
-    return toAuthUser(user)
+    return this.toAuthUser(user)
+  }
+
+  private toAuthUser(user: UserWithBusiness): AuthUser {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      business: user.business,
+      demoMode: this.config.get('DEMO_MODE', { infer: true }),
+    }
   }
 
   private async issueSession(user: UserWithBusiness, familyId: string, userAgent?: string): Promise<IssuedSession> {
@@ -106,10 +117,6 @@ export class AuthService {
       data: { userId: user.id, tokenHash: hashToken(refreshToken), familyId, expiresAt: refreshExpiresAt, userAgent: userAgent?.slice(0, 255) },
     })
 
-    return { response: { accessToken, expiresIn, user: toAuthUser(user) }, refreshToken, refreshExpiresAt }
+    return { response: { accessToken, expiresIn, user: this.toAuthUser(user) }, refreshToken, refreshExpiresAt }
   }
-}
-
-function toAuthUser(user: UserWithBusiness): AuthUser {
-  return { id: user.id, name: user.name, email: user.email, role: user.role, business: user.business }
 }

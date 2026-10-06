@@ -1,14 +1,19 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import type { CreateUserInput, UpdateUserInput, UserDto } from '@stock/shared'
 import * as argon2 from 'argon2'
 import { AppError } from '../common/app-error'
+import type { Env } from '../config/env'
 import type { User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import type { RequestUser } from '../auth/auth.types'
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService<Env, true>,
+  ) {}
 
   async list(businessId: string): Promise<UserDto[]> {
     const users = await this.prisma.user.findMany({ where: { businessId }, orderBy: [{ active: 'desc' }, { name: 'asc' }] })
@@ -16,6 +21,7 @@ export class UsersService {
   }
 
   async create(actor: RequestUser, input: CreateUserInput): Promise<UserDto> {
+    this.assertNotDemo()
     await this.assertEmailFree(input.email)
     const user = await this.prisma.user.create({
       data: {
@@ -30,6 +36,7 @@ export class UsersService {
   }
 
   async update(actor: RequestUser, id: string, input: UpdateUserInput): Promise<UserDto> {
+    this.assertNotDemo()
     const current = await this.prisma.user.findFirst({ where: { id, businessId: actor.businessId } })
     if (!current) throw AppError.notFound('El usuario')
 
@@ -56,6 +63,17 @@ export class UsersService {
       return updated
     })
     return toUserDto(user)
+  }
+
+  /** En la demo pública las cuentas son compartidas: nadie puede cambiarlas ni crear otras. */
+  private assertNotDemo(): void {
+    if (this.config.get('DEMO_MODE', { infer: true })) {
+      throw new AppError(
+        HttpStatus.FORBIDDEN,
+        'DEMO_READ_ONLY',
+        'En la demo no se pueden crear ni modificar usuarios, para que siga funcionando para todos.',
+      )
+    }
   }
 
   private async assertEmailFree(email: string): Promise<void> {

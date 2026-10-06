@@ -29,3 +29,6 @@ services:
         value: lax
       - key: TRUST_PROXY_HOPS
         value: "2"
+      # Demo pública: las cuentas de prueba no se pueden modificar (ver SECURITY.md).
+      - key: DEMO_MODE
+        value: "true"

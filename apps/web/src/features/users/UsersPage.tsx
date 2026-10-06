@@ -4,11 +4,13 @@ import { formatDateTime } from '../../lib/format'
 import { Badge } from '../../shared/ui/Badge'
 import { Button } from '../../shared/ui/Button'
 import { ErrorState, LoadingState } from '../../shared/ui/Feedback'
+import { Icon } from '../../shared/ui/Icon'
 import { Card, Page, PageHeader } from '../../shared/ui/Layout'
 import table from '../../shared/ui/table.module.css'
 import { useCurrentUser } from '../auth/AuthProvider'
 import { UserFormDialog } from './UserFormDialog'
 import { useUsers } from './api'
+import styles from './UsersPage.module.css'
 
 export function UsersPage() {
   const me = useCurrentUser()
@@ -21,11 +23,23 @@ export function UsersPage() {
         title="Equipo"
         subtitle="Quién puede ingresar y qué puede hacer cada uno."
         actions={
-          <Button variant="primary" icon="plus" onClick={() => setEditing('new')}>
-            Nuevo usuario
-          </Button>
+          !me.demoMode && (
+            <Button variant="primary" icon="plus" onClick={() => setEditing('new')}>
+              Nuevo usuario
+            </Button>
+          )
         }
       />
+      {me.demoMode && (
+        <p className={styles.demoNotice} role="note">
+          <Icon name="info" size={18} />
+          <span>
+            <strong>Modo demo.</strong> Estas cuentas las comparten todos los visitantes, así que no se pueden crear ni
+            modificar usuarios: si alguien cambiara una contraseña, nadie más podría entrar. En una instalación real, la dueña
+            administra el equipo desde acá.
+          </span>
+        </p>
+      )}
       <Card flush>
         {users.isPending ? (
           <LoadingState />
@@ -67,9 +81,11 @@ export function UsersPage() {
                     {user.lastLoginAt ? formatDateTime(user.lastLoginAt) : 'Nunca'}
                   </td>
                   <td>
-                    <Button size="sm" variant="ghost" icon="edit" onClick={() => setEditing(user)}>
-                      Editar
-                    </Button>
+                    {!me.demoMode && (
+                      <Button size="sm" variant="ghost" icon="edit" onClick={() => setEditing(user)}>
+                        Editar
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}

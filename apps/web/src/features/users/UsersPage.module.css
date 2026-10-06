@@ -1,0 +1,22 @@
+.demoNotice {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4) var(--space-5);
+  border: var(--stroke) solid var(--color-border-strong);
+  border-left: 6px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.demoNotice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-ink);
+}
+
+.demoNotice strong {
+  color: var(--color-ink);
+}

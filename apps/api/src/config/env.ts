@@ -18,6 +18,11 @@ const envSchema = z.object({
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
   /** Cantidad de proxies delante de la API (Netlify + Render = 2), para que el rate limit vea la IP real. */
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
+  /** Demo pública con cuentas compartidas: impide crear o modificar usuarios. */
+  DEMO_MODE: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
 })
 
 export type Env = z.infer<typeof envSchema>
