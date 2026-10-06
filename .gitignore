@@ -7,3 +7,4 @@ coverage
 apps/api/src/generated
 playwright-report
 test-results
+*.tsbuildinfo
