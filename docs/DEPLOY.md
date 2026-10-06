@@ -37,9 +37,9 @@ Los secretos no se suben: `.env` está en `.gitignore`.
 
 ## 2. Base de datos en Neon
 
-1. Creá una cuenta en [neon.com](https://neon.com) (podés entrar con GitHub) y un proyecto llamado `stock-simple`, región **AWS São Paulo** (la más cercana a Argentina).
+1. Creá una cuenta en [neon.com](https://neon.com) (podés entrar con GitHub) y un proyecto llamado `stock-simple`, región **AWS US East 1 (N. Virginia)**. Tiene que ser la misma región que la API en Render (`region: virginia` en `render.yaml`), porque cada pedido hace varias consultas a la base. Render no tiene región en Sudamérica.
 2. En **Connect**, desactivá **Connection pooling** y copiá la connection string. Tiene esta forma:
-   `postgresql://usuario:clave@ep-xxxx.sa-east-1.aws.neon.tech/neondb?sslmode=require`
+   `postgresql://usuario:clave@ep-xxxx.us-east-1.aws.neon.tech/neondb?sslmode=require`
    Usá la conexión **directa** (sin `-pooler` en el host): las migraciones de Prisma la necesitan.
 3. Desde tu máquina, creá las tablas y cargá los datos de demo:
 

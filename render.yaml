@@ -6,6 +6,8 @@ services:
     name: stock-simple-api
     runtime: node
     plan: free
+    # Misma región que la base de Neon (AWS us-east-1): cada consulta tarda ~1 ms en lugar de ~120 ms.
+    region: virginia
     # --include=dev: con NODE_ENV=production npm omite las devDependencies, y el build necesita
     # Prisma, Nest CLI y TypeScript.
     buildCommand: npm ci --include=dev && npm run build -w @stock/shared && npm run build -w @stock/api
