@@ -1,20 +1,52 @@
 # Stock Simple
 
-**Stock, caja y precios para skate shops y comercios chicos.** Un punto de venta rápido, stock por talle con historial de cada movimiento, aumentos masivos de precios con redondeo comercial y reportes de ventas y márgenes.
+**Stock, caja y precios para tiendas chicas.** Punto de venta rápido, stock por talle con historial de cada movimiento, aumentos masivos de precios con redondeo comercial y reportes de ventas y márgenes. Monorepo full stack con **React 19 + NestJS + PostgreSQL**.
 
-> El problema: las tiendas chicas de ropa y skate llevan el stock en un cuaderno o en Excel. No saben qué talle falta ni qué producto les deja ganancia y, con inflación, actualizar cientos de precios a mano es una tarde perdida cada cambio de temporada.
+[![CI](https://github.com/adrianGette/stock-simple/actions/workflows/ci.yml/badge.svg)](https://github.com/adrianGette/stock-simple/actions/workflows/ci.yml)
+[![Demo en vivo](https://img.shields.io/badge/demo-en%20vivo-f25200)](https://stock-simple-adrian.netlify.app)
 
-## Probalo
+### 👉 [Ver la demo en vivo](https://stock-simple-adrian.netlify.app)
 
-Después de `npm run setup` (ver abajo), la pantalla de ingreso ofrece accesos rápidos con tres usuarios de demostración. La contraseña de todos es `demo1234`:
+Entrá con los botones de demo del login (contraseña `demo1234`). Cada rol ve una app distinta:
 
-| Rol | Email | Qué puede hacer |
-| --- | --- | --- |
-| Dueña | `duena@stocksimple.demo` | Todo: costos, márgenes, reportes, equipo |
-| Encargado | `encargado@stocksimple.demo` | Productos, stock, precios, ventas y reportes |
-| Cajera | `cajera@stocksimple.demo` | Vende y consulta precios; **no ve costos** |
+| Rol | Qué puede hacer |
+| --- | --- |
+| **Dueña** | Todo: costos, márgenes, reportes y equipo |
+| **Encargado** | Productos, stock, precios, ventas y reportes |
+| **Cajera** | Vende y consulta precios; **no ve costos** (ni en pantalla ni en la API) |
 
-El seed carga una skate shop de demo (**Shop**): 51 productos (remeras, buzos, pantalones y zapatillas con un SKU por talle, tablas, ruedas, trucks, rulemanes y accesorios) y 45 días de ventas realistas. El sábado es el día fuerte, hay un aumento de temporada en la indumentaria a mitad del período y algunas anulaciones.
+> La demo usa planes gratuitos: si nadie la usó en los últimos 15 minutos, el servidor tarda unos 50 segundos en despertar. La app lo avisa con "Despertando el servidor…".
+
+![Tablero de inicio en modo oscuro](docs/screenshots/inicio-dark.jpg)
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/vender.jpg" alt="Punto de venta con carrito" /><p align="center"><b>Punto de venta</b>: búsqueda, lector de código de barras y carrito</p></td>
+    <td width="50%"><img src="docs/screenshots/cobro.jpg" alt="Cobro con cálculo de vuelto" /><p align="center"><b>Cobro</b>: medios de pago y cálculo de vuelto</p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/precios.jpg" alt="Actualización masiva de precios con vista previa" /><p align="center"><b>Aumentos masivos</b>: vista previa con el margen antes y después</p></td>
+    <td width="50%"><img src="docs/screenshots/reportes.jpg" alt="Reportes de ventas" /><p align="center"><b>Reportes</b>: ventas por día, categoría y medio de pago</p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/inicio-light.jpg" alt="Tablero en modo claro" /><p align="center"><b>Modo claro</b></p></td>
+    <td width="50%" align="center"><img src="docs/screenshots/celular.jpg" alt="Punto de venta en el celular" width="45%" /><p align="center"><b>Celular</b>: barra de cobro fija y navegación inferior</p></td>
+  </tr>
+</table>
+
+## El problema
+
+Las tiendas chicas de ropa y skate llevan el stock en un cuaderno o en Excel. No saben qué talle falta ni qué producto les deja ganancia y, con inflación, actualizar cientos de precios a mano es una tarde perdida cada cambio de temporada. Stock Simple resuelve el día a día del mostrador: vender rápido, saber qué hay y qué falta, y subir precios en segundos sin errores.
+
+## Lo más interesante técnicamente
+
+- **Ventas que nunca venden de más:** cada venta es una transacción con descuento de stock condicional y bloqueo ordenado. Un test e2e lanza 12 ventas simultáneas sobre 5 unidades y exige que se aprueben exactamente 5 ([ADR 0003](docs/adr/0003-concurrencia-en-ventas.md)).
+- **Cobros idempotentes:** si la red falla y el POS reintenta, la API devuelve la misma venta en lugar de duplicarla.
+- **Una sola fuente de verdad:** web y API validan con los mismos esquemas Zod y calculan con las mismas funciones. La vista previa de un aumento muestra exactamente lo que se va a guardar ([ADR 0001](docs/adr/0001-monorepo-con-paquete-compartido.md)).
+- **Seguridad:** permisos por rol aplicados en el servidor, aislamiento entre comercios, refresh token rotativo en cookie httpOnly con detección de reutilización, rate limiting y Helmet ([ADR 0004](docs/adr/0004-sesion-con-refresh-token-en-cookie.md)).
+- **Dinero en centavos enteros**, sin errores de punto flotante ([ADR 0002](docs/adr/0002-dinero-en-centavos-enteros.md)).
+- **Más de 80 tests** (unitarios, de API contra Postgres real y Playwright en escritorio y celular) que corren en cada push con GitHub Actions.
+- **Desplegado gratis** en Netlify + Render + Neon, con proxy de mismo origen y manejo del "servidor dormido" ([guía de deploy](docs/DEPLOY.md)).
 
 ## Funcionalidades
 
@@ -26,6 +58,10 @@ El seed carga una skate shop de demo (**Shop**): 51 productos (remeras, buzos, p
 - **Equipo:** alta de usuarios, roles y desactivación (que cierra sus sesiones al instante).
 - **Identidad punk de póster impreso:** blanco y tinta negra, tipografía condensada, bordes duros y sombras tipo sticker. Un único acento naranja seguridad marca solo los puntos de interacción (acción principal, foco, selección e ítem activo).
 - Modo claro y oscuro, diseño responsive y accesible: contraste AA, navegación por teclado, gráficos con vista de tabla y estados que nunca dependen solo del color.
+
+### Datos de la demo
+
+El seed carga una skate shop (**Shop**): 51 productos (remeras, buzos, pantalones y zapatillas con un SKU por talle, tablas, ruedas, trucks, rulemanes y accesorios) y 45 días de ventas realistas. El sábado es el día fuerte, hay un aumento de temporada en la indumentaria a mitad del período y algunas anulaciones.
 
 ## Arquitectura
 
@@ -103,7 +139,7 @@ npm run dev:api      # http://localhost:3000/api · Swagger en /api/docs
 npm run dev:web      # http://localhost:5173
 ```
 
-`npm run db:seed -w @stock/api` vuelve a cargar los datos de demo (borra los actuales).
+`npm run db:seed -w @stock/api` vuelve a cargar los datos de demo (borra los actuales). En local, los usuarios de demo son `duena@`, `encargado@` y `cajera@stocksimple.demo`, con contraseña `demo1234`.
 
 ## Tests
 
@@ -134,3 +170,7 @@ Variables de la API: ver [`apps/api/.env.example`](apps/api/.env.example). Si la
 - Variantes agrupadas (talle y color bajo un mismo artículo; hoy cada talle es un SKU propio) y combos, como un skate armado con sus partes.
 - Proveedores y órdenes de compra.
 - Exportar reportes a CSV.
+
+## Autor
+
+Hecho por **Adrián Gette** · [GitHub](https://github.com/adrianGette)
