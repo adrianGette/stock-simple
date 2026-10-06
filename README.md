@@ -15,7 +15,7 @@ Entrá con los botones de demo del login (contraseña `demo1234`). Cada rol ve u
 | **Encargado** | Productos, stock, precios, ventas y reportes |
 | **Cajera** | Vende y consulta precios; **no ve costos** (ni en pantalla ni en la API) |
 
-> La demo usa planes gratuitos: si nadie la usó en los últimos 15 minutos, el servidor tarda unos 50 segundos en despertar. La app lo avisa con "Despertando el servidor…".
+> La demo usa planes gratuitos: si nadie la usó en los últimos 15 minutos, el servidor tarda unos 50 segundos en despertar. La app lo avisa con "Despertando el servidor…". Las cuentas son compartidas, así que no se pueden modificar usuarios, y los datos se reinician cada madrugada.
 
 ![Tablero de inicio en modo oscuro](docs/screenshots/inicio-dark.jpg)
 
@@ -43,7 +43,7 @@ Las tiendas chicas de ropa y skate llevan el stock en un cuaderno o en Excel. No
 - **Ventas que nunca venden de más:** cada venta es una transacción con descuento de stock condicional y bloqueo ordenado. Un test e2e lanza 12 ventas simultáneas sobre 5 unidades y exige que se aprueben exactamente 5 ([ADR 0003](docs/adr/0003-concurrencia-en-ventas.md)).
 - **Cobros idempotentes:** si la red falla y el POS reintenta, la API devuelve la misma venta en lugar de duplicarla.
 - **Una sola fuente de verdad:** web y API validan con los mismos esquemas Zod y calculan con las mismas funciones. La vista previa de un aumento muestra exactamente lo que se va a guardar ([ADR 0001](docs/adr/0001-monorepo-con-paquete-compartido.md)).
-- **Seguridad:** permisos por rol aplicados en el servidor, aislamiento entre comercios, refresh token rotativo en cookie httpOnly con detección de reutilización, rate limiting y Helmet ([ADR 0004](docs/adr/0004-sesion-con-refresh-token-en-cookie.md)).
+- **Seguridad:** permisos por rol aplicados en el servidor, aislamiento entre comercios, refresh token rotativo en cookie httpOnly con detección de reutilización, rate limiting, CSP y modo demo que impide tomar el control de las cuentas compartidas. Detalle y riesgos aceptados en [SECURITY.md](SECURITY.md).
 - **Dinero en centavos enteros**, sin errores de punto flotante ([ADR 0002](docs/adr/0002-dinero-en-centavos-enteros.md)).
 - **Más de 80 tests** (unitarios, de API contra Postgres real y Playwright en escritorio y celular) que corren en cada push con GitHub Actions.
 - **Desplegado gratis** en Netlify + Render + Neon, con proxy de mismo origen y manejo del "servidor dormido" ([guía de deploy](docs/DEPLOY.md)).

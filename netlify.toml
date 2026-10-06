@@ -21,6 +21,19 @@
   to = "/index.html"
   status = 200
 
+# Cabeceras de seguridad de la web (la API tiene las suyas con Helmet).
+# - CSP: solo se ejecuta código propio. El hash autoriza el único script en línea de index.html
+#   (aplica el tema antes de pintar); un test verifica que coincida si alguien lo edita.
+# - frame-ancestors: solo este sitio y el portafolio pueden mostrar la app en un iframe
+#   (evita clickjacking; el portafolio la muestra como vista previa).
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'sha256-eJSUk0aEeSGB9u/COhR/VdN4AI2NdcnkqMkmbOW30Ow='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'self' https://adrian-gette-portfolio.netlify.app; base-uri 'self'; form-action 'self'; object-src 'none'"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
