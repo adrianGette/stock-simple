@@ -1,0 +1,22 @@
+# Lo que Docker NO copia al construir las imágenes.
+# Más chico el contexto = builds más rápidos, y ningún secreto termina dentro de una imagen.
+
+# Dependencias y resultados de build: se generan dentro de la imagen
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+apps/api/src/generated
+
+# Secretos y configuración local
+**/.env
+**/.env.*
+!**/.env.example
+
+# Git, tests y documentación que no hacen falta para correr la app
+.git
+.github
+**/coverage
+**/test-results
+**/playwright-report
+docs/screenshots
+**/.DS_Store

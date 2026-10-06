@@ -8,7 +8,7 @@
     "apps/*"
   ],
   "scripts": {
-    "db:up": "docker compose up -d --wait",
+    "db:up": "docker compose up -d --wait db",
     "db:down": "docker compose down",
     "setup": "npm run db:up && npm run build:shared && npm run db:deploy -w @stock/api && npm run db:seed -w @stock/api",
     "build:shared": "npm run build -w @stock/shared",
@@ -19,7 +19,9 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:api:e2e": "npm run test:e2e -w @stock/api",
-    "test:web:e2e": "npm run test:e2e -w @stock/web"
+    "test:web:e2e": "npm run test:e2e -w @stock/web",
+    "docker:up": "docker compose up --build -d --wait",
+    "docker:down": "docker compose down"
   },
   "engines": {
     "node": ">=22"

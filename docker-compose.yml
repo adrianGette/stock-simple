@@ -1,3 +1,11 @@
+# Stock Simple completo en contenedores:
+#
+#   docker compose up --build      → http://localhost:8080
+#
+# Orden de arranque: db (sana) → migrate (terminó bien) → api (sana) → web.
+# Para desarrollar con recarga en caliente se usa solo la base (`npm run db:up`)
+# y la API y la web corren con npm (ver README).
+
 services:
   db:
     image: postgres:17-alpine
@@ -17,6 +25,54 @@ services:
       interval: 2s
       timeout: 3s
       retries: 20
+
+  # Tarea de única vez: aplica migraciones y, si la base está vacía, carga la demo.
+  # Usa la etapa "build" de la imagen de la API, que tiene el CLI de Prisma y tsx.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+    environment:
+      DATABASE_URL: postgresql://stock:stock@db:5432/stock_simple
+      SEED_ONLY_IF_EMPTY: "true"
+    command: sh -c "npm run db:deploy -w @stock/api && npm run db:seed -w @stock/api"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runtime
+    environment:
+      # "db" es el nombre del servicio: dentro de la red de Docker funciona como dominio.
+      DATABASE_URL: postgresql://stock:stock@db:5432/stock_simple
+      # Secreto solo para uso local. En producción lo genera Render (ver render.yaml).
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-local-docker-secret-change-me-0123456789}
+      WEB_ORIGIN: http://localhost:8080
+      # http://localhost no es HTTPS: sin esto Safari descarta la cookie de sesión.
+      COOKIE_SECURE: "false"
+      TRUST_PROXY_HOPS: "1" # nginx
+      DEMO_MODE: "false"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    # Sin "ports": la API no se publica hacia afuera, solo la ve nginx.
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   db-data:

@@ -24,3 +24,21 @@ describe('Content-Security-Policy de netlify.toml', () => {
     expect(csp).toMatch(/frame-ancestors 'self'/)
   })
 })
+
+describe('cabeceras de nginx (imagen Docker de la web)', () => {
+  it('usa exactamente la misma CSP que Netlify', () => {
+    const netlify = /Content-Security-Policy = "([^"]+)"/.exec(read('../../../netlify.toml'))?.[1]
+    const nginx = /add_header Content-Security-Policy "([^"]+)" always;/.exec(read('../nginx/security-headers.conf'))?.[1]
+    expect(nginx).toBeTruthy()
+    expect(nginx).toBe(netlify)
+  })
+
+  it('aplica las cabeceras de seguridad en cada location que sirve la web', () => {
+    const conf = read('../nginx/default.conf')
+    for (const location of ['/assets/', '/']) {
+      const block = new RegExp(`location ${location.replace(/\//g, '\\/')} \\{([^}]*)\\}`).exec(conf)?.[1] ?? ''
+      expect(block).toContain('include /etc/nginx/snippets/security-headers.conf;')
+    }
+  })
+})
+
