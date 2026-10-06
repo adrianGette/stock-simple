@@ -124,6 +124,27 @@ stock-simple/
 
 ## Cómo correrlo
 
+### Opción A: con Docker (un solo comando)
+
+Requisito: **Docker**. No hace falta instalar Node.
+
+```bash
+docker compose up --build
+```
+
+Abrí **http://localhost:8080** y entrá con los botones de demo. La primera vez tarda unos minutos porque construye las imágenes.
+
+| Servicio | Qué hace |
+| --- | --- |
+| `db` | PostgreSQL 17 con un volumen persistente |
+| `migrate` | Tarea de única vez: aplica las migraciones y, si la base está vacía, carga la demo |
+| `api` | NestJS en una imagen multi-etapa liviana: sin herramientas de build y corriendo sin privilegios de root |
+| `web` | El build de React servido por nginx (también sin root), que reenvía `/api` a la API igual que Netlify en producción |
+
+Cada servicio espera a que el anterior esté sano antes de arrancar. Para apagar todo: `docker compose down` (agregá `-v` para borrar también los datos).
+
+### Opción B: para desarrollar (con recarga en caliente)
+
 Requisitos: **Node 22+** y **Docker** (para PostgreSQL).
 
 ```bash

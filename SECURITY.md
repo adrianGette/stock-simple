@@ -27,6 +27,13 @@ Resumen de cómo está protegida Stock Simple y qué riesgos se aceptaron consci
 - **API:** Helmet (CSP, HSTS, `nosniff`, `X-Frame-Options`, `Referrer-Policy`) y CORS restringido al dominio de la web.
 - **Web (Netlify):** CSP que solo permite código propio (el único script en línea está autorizado por hash, y un test verifica que coincida), `frame-ancestors` limitado al sitio y al portafolio, `nosniff`, `Referrer-Policy` y `Permissions-Policy`.
 
+## Contenedores
+
+- Las imágenes de la API y la web corren con usuarios **sin privilegios de root**.
+- La imagen final de la API no incluye compiladores, CLIs ni herramientas de test (build multi-etapa).
+- `.dockerignore` impide que archivos `.env` terminen dentro de una imagen.
+- En `docker compose`, la API no se publica hacia afuera: solo la ve nginx dentro de la red de Docker. La base y la web escuchan solo en `127.0.0.1`.
+
 ## Secretos
 
 - Ningún secreto vive en el repositorio: `.env` está en `.gitignore`, y la historia completa se revisó en busca de credenciales.
