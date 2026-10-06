@@ -1,0 +1,93 @@
+.dialog {
+  width: min(100% - 2rem, var(--dialog-width, 32rem));
+  max-height: min(100dvh - 2rem, 48rem);
+  padding: 0;
+  border: var(--stroke) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-hard-lg);
+  overflow: hidden;
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 160ms var(--ease-out),
+    translate 160ms var(--ease-out),
+    overlay 160ms allow-discrete,
+    display 160ms allow-discrete;
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  translate: 0 0;
+}
+
+@starting-style {
+  .dialog[open] {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+.dialog::backdrop {
+  background: var(--backdrop);
+  backdrop-filter: blur(2px);
+}
+
+.wide {
+  --dialog-width: 48rem;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-3);
+}
+
+.title {
+  font-size: var(--text-xl);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--display-weight);
+  text-transform: uppercase;
+}
+
+.description {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.body {
+  padding: var(--space-2) var(--space-5) var(--space-5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-top: var(--stroke) solid var(--color-frame);
+  background: var(--color-surface-2);
+}
+
+/* En celulares el diálogo sube desde abajo como una hoja. */
+@media (max-width: 640px) {
+  .dialog {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: 92dvh;
+    translate: 0 24px;
+  }
+
+  .footer > * {
+    flex: 1;
+  }
+}

@@ -1,0 +1,145 @@
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.marginHint {
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.formError {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .formActions > * {
+    flex: 1;
+  }
+}
+
+.stockCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .stockCell {
+    justify-content: flex-start;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--space-3);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--color-ink);
+}
+
+.positive {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.negative {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.adjustForm {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.preview strong {
+  font-size: var(--text-xl);
+}
+
+.categoryList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.categoryRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 3rem;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.categoryName {
+  flex: 1;
+  min-width: 0;
+}
+
+.categoryCount {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.inlineForm {
+  display: flex;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.inlineForm > :first-child {
+  flex: 1;
+}

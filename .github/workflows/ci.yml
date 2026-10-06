@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Lint, tipos y tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: stock
+          POSTGRES_PASSWORD: stock
+          POSTGRES_DB: stock_simple_test
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U stock"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://stock:stock@localhost:5433/stock_simple_test
+      TEST_DATABASE_URL: postgresql://stock:stock@localhost:5433/stock_simple_test
+      JWT_ACCESS_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build:shared
+      - run: npx prisma generate
+        working-directory: apps/api
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - name: Tests e2e de la API (contra Postgres real)
+        run: npm run test:api:e2e
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+      - name: Tests e2e de la web (Playwright)
+        run: npm run test:web:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/test-results

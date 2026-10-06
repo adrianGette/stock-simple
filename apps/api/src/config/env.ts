@@ -1,0 +1,32 @@
+import { z } from 'zod'
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().int().positive().default(3000),
+  DATABASE_URL: z.url(),
+  WEB_ORIGIN: z
+    .string()
+    .default('http://localhost:5173')
+    .transform((value) => value.split(',').map((origin) => origin.trim()).filter(Boolean)),
+  JWT_ACCESS_SECRET: z.string().min(32, 'Usá un secreto de al menos 32 caracteres'),
+  ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),
+  REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
+  /**
+   * 'lax' cuando la web llega a la API por el mismo origen (proxy de Netlify, recomendado).
+   * 'none' solo si web y API viven en dominios distintos sin proxy (cookie de terceros).
+   */
+  COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
+  /** Cantidad de proxies delante de la API (Netlify + Render = 2), para que el rate limit vea la IP real. */
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
+})
+
+export type Env = z.infer<typeof envSchema>
+
+/** Falla al arrancar si falta o es inválida alguna variable, en lugar de fallar en runtime. */
+export function validateEnv(config: Record<string, unknown>): Env {
+  const result = envSchema.safeParse(config)
+  if (!result.success) {
+    throw new Error(`Variables de entorno inválidas:\n${z.prettifyError(result.error)}`)
+  }
+  return result.data
+}

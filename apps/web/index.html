@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Stock Simple: stock, caja y precios para skate shops y comercios chicos." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Stock Simple</title>
+    <script>
+      // Aplica el tema elegido antes del primer pintado para evitar un parpadeo.
+      try {
+        const scheme = localStorage.getItem('color-scheme')
+        if (scheme === 'light' || scheme === 'dark') {
+          document.querySelector('meta[name="color-scheme"]').content = scheme
+          document.documentElement.dataset.theme = scheme
+        }
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+.content {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.total {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  text-align: center;
+}
+
+.totalLabel {
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.totalValue {
+  font-size: var(--text-hero);
+  font-stretch: 72%;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.methods legend {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 550;
+}
+
+.method {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  border: var(--stroke) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 100ms,
+    background-color 100ms;
+}
+
+.method input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.method:has(input:checked) {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  box-shadow: var(--shadow-hard);
+}
+
+.method:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent-vivid);
+  outline-offset: 2px;
+}
+
+.cash {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.change {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: var(--stroke) dashed var(--color-border-strong);
+}
+
+.changeValue {
+  font-size: var(--text-xl);
+  font-stretch: 75%;
+  font-weight: 850;
+}
+
+.missing {
+  color: var(--color-danger);
+}
+
+.error {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}

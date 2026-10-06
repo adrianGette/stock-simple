@@ -1,0 +1,165 @@
+/*
+ * Tokens de diseño de Stock Simple · edición skate shop.
+ * Estética punk/fanzine pero usable todo el día: papel, tinta negra, bordes duros, sombras
+ * desplazadas tipo sticker y un único acento (naranja seguridad) solo donde se interactúa:
+ * acción principal, foco, selección e ítem activo.
+ * El modo oscuro tiene sus propios valores y sigue al sistema salvo que el usuario fije un tema.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Tipografía: Archivo variable. Condensada y pesada en títulos (póster), normal en el texto. */
+  --font-sans: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', monospace;
+  --display-stretch: 68%;
+  --display-weight: 820;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2.25rem;
+  --text-hero: clamp(2.75rem, 6vw, 3.75rem);
+
+  /* Espaciado (escala de 4px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Esquinas casi rectas: más recorte de fanzine que app de banco. */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-full: 999px;
+
+  --stroke: 2px;
+  --sidebar-width: 236px;
+  --content-max: 1200px;
+  --control-height: 2.5rem;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Colores — modo claro: póster impreso, blanco puro y tinta */
+  --color-page: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f3f3f3;
+  --color-surface-hover: #ebebeb;
+  --color-ink: #0a0a0a;
+  --color-ink-2: #3d3d3d;
+  --color-muted: #666666;
+  --color-border: #e2e2e2;
+  --color-border-strong: #0a0a0a;
+  --color-frame: #0a0a0a;
+  --color-grid: #ececec;
+
+  /* Acento naranja seguridad: energía DIY sin leerse como "peligro". Texto negro encima (5,6:1). */
+  --color-accent: #f25200;
+  --color-accent-hover: #ff6a1a;
+  --color-accent-vivid: #f25200;
+  --color-accent-text: #c2410c;
+  --color-accent-ink: #0a0a0a;
+  --color-accent-soft: #ffeadf;
+  --color-accent-soft-ink: #9a3412;
+
+  /* Gráficos: marcas en tinta; la marca activa toma el acento. */
+  --color-chart: #2b2b2b;
+  --color-chart-active: #f25200;
+
+  /* Estados tipo sticker, separados del acento y siempre con ícono + texto */
+  --color-success: #137a3a;
+  --color-success-soft: #e2f4e8;
+  --color-warning: #0a0a0a;
+  --color-warning-soft: #ffe14d;
+  --color-danger: #c41d33;
+  --color-danger-soft: #fde4e7;
+  --color-danger-hover: #a3182b;
+
+  /* Sombra dura desplazada (sticker / serigrafía), en lugar de sombras difusas */
+  --color-hard-shadow: #0a0a0a;
+  --shadow-hard: 3px 3px 0 var(--color-hard-shadow);
+  --shadow-hard-lg: 6px 6px 0 var(--color-hard-shadow);
+  --shadow-sm: none;
+  --shadow-md: var(--shadow-hard);
+  --shadow-lg: var(--shadow-hard-lg);
+  --backdrop: rgb(10 10 10 / 0.55);
+  --focus-ring: 0 0 0 3px rgb(242 82 0 / 0.3);
+}
+
+/* Modo oscuro: sigue al sistema salvo que el usuario haya fijado el tema claro. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-page: #0a0a0a;
+    --color-surface: #151515;
+    --color-surface-2: #1e1e1e;
+    --color-surface-hover: #282828;
+    --color-ink: #f5f5f5;
+    --color-ink-2: #c8c8c8;
+    --color-muted: #9a9a9a;
+    --color-border: #2b2b2b;
+    --color-border-strong: #f5f5f5;
+    --color-frame: #3a3a3a;
+    --color-grid: #252525;
+    --color-accent: #ff6a1a;
+    --color-accent-hover: #ff8640;
+    --color-accent-vivid: #ff6a1a;
+    --color-accent-text: #ff8a4c;
+    --color-accent-ink: #0a0a0a;
+    --color-accent-soft: #2e170a;
+    --color-accent-soft-ink: #ffb088;
+    --color-chart: #d6d6d6;
+    --color-chart-active: #ff6a1a;
+    --color-success: #4ade80;
+    --color-success-soft: #10261a;
+    --color-warning: #0a0a0a;
+    --color-warning-soft: #ffe14d;
+    --color-danger: #ff5c70;
+    --color-danger-soft: #331418;
+    --color-danger-hover: #ff7a8b;
+    --color-hard-shadow: #f5f5f5;
+    --backdrop: rgb(0 0 0 / 0.7);
+    --focus-ring: 0 0 0 3px rgb(255 106 26 / 0.4);
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-page: #0a0a0a;
+  --color-surface: #151515;
+  --color-surface-2: #1e1e1e;
+  --color-surface-hover: #282828;
+  --color-ink: #f5f5f5;
+  --color-ink-2: #c8c8c8;
+  --color-muted: #9a9a9a;
+  --color-border: #2b2b2b;
+  --color-border-strong: #f5f5f5;
+  --color-frame: #3a3a3a;
+  --color-grid: #252525;
+  --color-accent: #ff6a1a;
+  --color-accent-hover: #ff8640;
+  --color-accent-vivid: #ff6a1a;
+  --color-accent-text: #ff8a4c;
+  --color-accent-ink: #0a0a0a;
+  --color-accent-soft: #2e170a;
+  --color-accent-soft-ink: #ffb088;
+  --color-chart: #d6d6d6;
+  --color-chart-active: #ff6a1a;
+  --color-success: #4ade80;
+  --color-success-soft: #10261a;
+  --color-warning: #0a0a0a;
+  --color-warning-soft: #ffe14d;
+  --color-danger: #ff5c70;
+  --color-danger-soft: #331418;
+  --color-danger-hover: #ff7a8b;
+  --color-hard-shadow: #f5f5f5;
+  --backdrop: rgb(0 0 0 / 0.7);
+  --focus-ring: 0 0 0 3px rgb(255 106 26 / 0.4);
+}

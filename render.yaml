@@ -1,0 +1,29 @@
+# Blueprint de Render: solo la API NestJS (plan gratuito).
+# La base de datos vive en Neon (plan gratuito permanente): la de Render se borra a los 30 días.
+# Ver docs/DEPLOY.md.
+services:
+  - type: web
+    name: stock-simple-api
+    runtime: node
+    plan: free
+    # --include=dev: con NODE_ENV=production npm omite las devDependencies, y el build necesita
+    # Prisma, Nest CLI y TypeScript.
+    buildCommand: npm ci --include=dev && npm run build -w @stock/shared && npm run build -w @stock/api
+    # El plan gratuito no tiene pre-deploy: las migraciones se aplican al arrancar (son idempotentes).
+    startCommand: npm run db:deploy -w @stock/api && npm run start -w @stock/api
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      - key: DATABASE_URL
+        sync: false # connection string DIRECTA de Neon (sin "-pooler"), con ?sslmode=require
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: WEB_ORIGIN
+        sync: false # URL del sitio en Netlify, ej. https://stock-simple.netlify.app
+      - key: COOKIE_SAME_SITE
+        value: lax
+      - key: TRUST_PROXY_HOPS
+        value: "2"

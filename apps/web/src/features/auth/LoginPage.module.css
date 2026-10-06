@@ -1,0 +1,263 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.brandPanel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-10);
+  padding: var(--space-10) clamp(var(--space-6), 5vw, var(--space-12));
+  background-color: #0a0a0a;
+  /* Trama de puntos tipo serigrafía, apenas visible. */
+  background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+  color: #f5f5f5;
+  overflow: hidden;
+  border-right: var(--stroke) solid #0a0a0a;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xl);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--display-weight);
+  text-transform: uppercase;
+  position: relative;
+}
+
+.logoMark {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: var(--stroke) solid #f5f5f5;
+  border-radius: var(--radius-sm);
+  background: #ff6a1a;
+  color: #0a0a0a;
+  rotate: -6deg;
+  box-shadow: 3px 3px 0 #f5f5f5;
+}
+
+.pitch {
+  position: relative;
+  max-width: 34rem;
+}
+
+.pitch h1 {
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  line-height: 0.9;
+}
+
+/* Palabra marcada como con fibrón: bloque naranja levemente torcido. */
+.highlight {
+  display: inline-block;
+  margin-top: 0.08em;
+  padding: 0 0.12em;
+  background: #ff6a1a;
+  color: #0a0a0a;
+  rotate: -2deg;
+}
+
+.pitch p {
+  margin-top: var(--space-6);
+  max-width: 28rem;
+  color: #c8c8c8;
+  font-size: var(--text-lg);
+}
+
+.sticker {
+  position: absolute;
+  top: var(--space-10);
+  right: clamp(var(--space-6), 5vw, var(--space-12));
+  padding: var(--space-2) var(--space-3);
+  border: var(--stroke) solid #0a0a0a;
+  background: #ffe14d;
+  color: #0a0a0a;
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  rotate: 8deg;
+  box-shadow: 3px 3px 0 #f5f5f5;
+}
+
+.features {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #c8c8c8;
+  font-size: var(--text-sm);
+}
+
+.features li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.features svg {
+  color: #ff6a1a;
+}
+
+.formPanel {
+  display: grid;
+  place-items: center;
+  padding: var(--space-10) var(--space-6);
+  background: var(--color-page);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+  width: min(100%, 24rem);
+}
+
+.formTitle {
+  font-size: var(--text-2xl);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--display-weight);
+  text-transform: uppercase;
+}
+
+.formSubtitle {
+  margin-top: var(--space-1);
+  color: var(--color-ink-2);
+}
+
+.alert {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--stroke) solid currentColor;
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.demoList {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.demoButton {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--stroke) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    box-shadow 90ms,
+    translate 90ms;
+}
+
+.demoButton:hover:not(:disabled) {
+  box-shadow: var(--shadow-hard);
+  translate: -1px -1px;
+}
+
+.demoButton:active:not(:disabled) {
+  box-shadow: none;
+  translate: 2px 2px;
+}
+
+.demoButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border: var(--stroke) solid var(--color-border-strong);
+  font-stretch: 75%;
+  font-weight: 850;
+  font-weight: 650;
+}
+
+.demoName {
+  display: block;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: var(--text-sm);
+}
+
+.demoDescription {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.demoButton > svg {
+  color: var(--color-muted);
+  transition: color 120ms, translate 120ms;
+}
+
+.demoButton:hover:not(:disabled) > svg {
+  color: var(--color-accent);
+  translate: 2px 0;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .brandPanel {
+    padding: var(--space-6);
+    gap: var(--space-6);
+  }
+
+  .sticker {
+    top: var(--space-6);
+    right: var(--space-6);
+  }
+
+  .features {
+    display: none;
+  }
+
+  .pitch p {
+    font-size: var(--text-md);
+  }
+}

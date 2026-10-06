@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "isolatedModules": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    "sourceMap": true,
+    "incremental": true,
+    "declaration": false
+  },
+  "include": ["src", "test", "prisma"]
+}

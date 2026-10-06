@@ -1,0 +1,90 @@
+.region {
+  /* Contenedor en top layer (popover manual): queda visible incluso sobre un diálogo modal. */
+  position: fixed;
+  inset: auto var(--space-4) var(--space-4) auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(24rem, calc(100vw - 2rem));
+  z-index: 1000;
+}
+
+.region:not(:popover-open) {
+  display: none;
+}
+
+/* Sin soporte de popover, el contenedor se muestra como un fixed común. */
+.fallback {
+  display: flex !important;
+}
+
+@media (max-width: 960px) {
+  .region {
+    inset: auto var(--space-4) calc(var(--space-4) + 4.5rem) var(--space-4);
+    width: auto;
+  }
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  background: var(--color-ink);
+  color: var(--color-page);
+  border: var(--stroke) solid var(--color-ink);
+  border-left: 6px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-hard);
+  font-size: var(--text-sm);
+  animation: enter 220ms var(--ease-out);
+}
+
+.icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.success .icon {
+  color: #4cc485;
+}
+
+.error .icon {
+  color: #f0776e;
+}
+
+.message {
+  flex: 1;
+  padding-top: 1px;
+}
+
+.close {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.close:hover {
+  opacity: 1;
+  background: rgb(255 255 255 / 0.1);
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}

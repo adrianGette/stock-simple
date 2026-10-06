@@ -1,0 +1,27 @@
+# Web en Netlify. La API corre en Render (ver render.yaml).
+[build]
+  command = "npm run build -w @stock/web"
+  publish = "apps/web/dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# La web llama a /api en su mismo origen y Netlify lo reenvía a la API:
+# la cookie de sesión queda first-party (ver docs/adr/0004).
+# Reemplazá la URL por la de tu servicio en Render.
+[[redirects]]
+  from = "/api/*"
+  to = "https://stock-simple-api.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA: cualquier otra ruta la resuelve React Router.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

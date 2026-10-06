@@ -1,0 +1,38 @@
+{
+  "name": "stock-simple",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Inventario y ventas para comercios chicos. Monorepo con API NestJS y web React.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "setup": "npm run db:up && npm run build:shared && npm run db:deploy -w @stock/api && npm run db:seed -w @stock/api",
+    "build:shared": "npm run build -w @stock/shared",
+    "dev:api": "npm run dev -w @stock/api",
+    "dev:web": "npm run dev -w @stock/web",
+    "build": "npm run build -w @stock/shared && npm run build -w @stock/api && npm run build -w @stock/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:api:e2e": "npm run test:e2e -w @stock/api",
+    "test:web:e2e": "npm run test:e2e -w @stock/web"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "@prisma/engines@7.10.0": true,
+    "@swc/core@1.16.13": true,
+    "esbuild@0.28.2": true,
+    "unrs-resolver@1.12.2": true,
+    "argon2@0.45.1": true,
+    "prisma@7.10.0": true,
+    "@scarf/scarf": false,
+    "msw": false
+  }
+}

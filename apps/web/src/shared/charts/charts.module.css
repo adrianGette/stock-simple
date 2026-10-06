@@ -1,0 +1,135 @@
+.chart {
+  position: relative;
+  width: 100%;
+  /* El SVG se dibuja con el ancho medido: sin esto, su tamaño anterior impediría que el
+     contenedor se achique y el gráfico quedaría desbordado tras agrandar la ventana. */
+  min-width: 0;
+  overflow-x: clip;
+  overflow-clip-margin: 8px;
+}
+
+.chart svg {
+  overflow: visible;
+}
+
+.chart:focus-visible {
+  outline: 2px solid var(--color-accent-vivid);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.grid {
+  stroke: var(--color-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.baseline {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.tick {
+  fill: var(--color-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.column {
+  fill: var(--color-chart);
+  transition: fill 120ms;
+}
+
+.column.active {
+  fill: var(--color-chart-active);
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  gap: 2px;
+  min-width: 10rem;
+  padding: var(--space-2) var(--space-3);
+  border: var(--stroke) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-hard);
+  font-size: var(--text-xs);
+  pointer-events: none;
+  translate: -50% 0;
+  white-space: nowrap;
+}
+
+.tooltipTitle {
+  color: var(--color-muted);
+}
+
+.tooltipValue {
+  font-size: var(--text-md);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  color: var(--color-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.bars {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(6rem, 9rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-sm);
+}
+
+.barLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-ink-2);
+}
+
+.barTrack {
+  height: 12px;
+}
+
+.bar {
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: var(--color-chart);
+  transition: background-color 120ms;
+}
+
+.barRow:hover .bar {
+  background: var(--color-chart-active);
+}
+
+.barValue {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.barShare {
+  margin-left: var(--space-2);
+  font-weight: 400;
+  color: var(--color-muted);
+}
