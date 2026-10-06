@@ -66,7 +66,9 @@ export class AuthController {
    */
   private cookieOptions(): CookieOptions {
     const sameSite = this.config.get('COOKIE_SAME_SITE', { infer: true })
-    const secure = this.config.get('NODE_ENV', { infer: true }) === 'production' || sameSite === 'none'
+    const forced = this.config.get('COOKIE_SECURE', { infer: true })
+    const secure =
+      sameSite === 'none' || (forced !== undefined ? forced === 'true' : this.config.get('NODE_ENV', { infer: true }) === 'production')
     return { httpOnly: true, secure, sameSite, path: '/api/auth' }
   }
 }

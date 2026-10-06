@@ -184,6 +184,12 @@ const PAYMENT_WEIGHTS: { method: PaymentMethod; weight: number }[] = [
 ]
 
 async function main(): Promise<void> {
+  // En docker compose el seed corre en cada arranque: con esta variable no pisa datos existentes.
+  if (process.env.SEED_ONLY_IF_EMPTY === 'true' && (await prisma.business.count()) > 0) {
+    console.log('La base ya tiene datos: no se recarga la demo.')
+    return
+  }
+
   console.log('Limpiando base…')
   await prisma.$executeRawUnsafe(
     'TRUNCATE businesses, users, sessions, categories, products, stock_movements, sales, sale_items, price_changes CASCADE',

@@ -16,6 +16,11 @@ const envSchema = z.object({
    * 'none' solo si web y API viven en dominios distintos sin proxy (cookie de terceros).
    */
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
+  /**
+   * Fuerza el atributo Secure de la cookie de sesión. Por defecto: activo en producción.
+   * Se apaga solo para correr la imagen de producción en http://localhost (docker compose).
+   */
+  COOKIE_SECURE: z.enum(['true', 'false']).optional(),
   /** Cantidad de proxies delante de la API (Netlify + Render = 2), para que el rate limit vea la IP real. */
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
   /** Demo pública con cuentas compartidas: impide crear o modificar usuarios. */
