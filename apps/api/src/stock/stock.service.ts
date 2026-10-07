@@ -70,7 +70,8 @@ export class StockService {
       this.prisma.stockMovement.findMany({
         where,
         include: movementInclude,
-        orderBy: { createdAt: 'desc' },
+        // El id desempata movimientos con la misma fecha (ver ORDER_BY en products.service).
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
