@@ -13,11 +13,13 @@ import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { toProductDto } from './product.mapper'
 
+// El id al final desempata: sin un orden total, Postgres puede ordenar distinto los empates
+// en cada consulta y la paginación por offset repite o saltea productos.
 const ORDER_BY: Record<ProductQuery['sort'], Prisma.ProductOrderByWithRelationInput[]> = {
-  name: [{ name: 'asc' }],
-  stock: [{ stock: 'asc' }, { name: 'asc' }],
-  price: [{ priceCents: 'desc' }, { name: 'asc' }],
-  updated: [{ updatedAt: 'desc' }],
+  name: [{ name: 'asc' }, { id: 'asc' }],
+  stock: [{ stock: 'asc' }, { name: 'asc' }, { id: 'asc' }],
+  price: [{ priceCents: 'desc' }, { name: 'asc' }, { id: 'asc' }],
+  updated: [{ updatedAt: 'desc' }, { id: 'asc' }],
 }
 
 @Injectable()
