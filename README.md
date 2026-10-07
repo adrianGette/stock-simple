@@ -180,6 +180,7 @@ Guía paso a paso en **[docs/DEPLOY.md](docs/DEPLOY.md)**. Todo en planes gratui
 - **Web → Netlify** (`netlify.toml`): build del workspace web y SPA routing. Netlify reenvía `/api/*` a la API, así la cookie de sesión es first-party.
 - **API → Render** (`render.yaml`): web service gratuito, con migraciones al arrancar y health check en `/api/health`.
 - **Base → Neon**: Postgres gratuito que no vence (la base gratuita de Render se borra a los 30 días).
+- **Releases manuales**: los PRs se mergean a `main` (copia de prueba gratis en Netlify) y solo se publica lo que llega a `production`, con un PR de release. Así se agrupan cambios y se cuidan los créditos del plan gratuito.
 
 En el plan gratuito la API se duerme sin uso. La web lo resuelve: despierta el servidor apenas se abre, muestra un aviso mientras tanto y reintenta sola las lecturas. Las escrituras no se reintentan automáticamente para no duplicarlas.
 

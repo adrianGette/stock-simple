@@ -6,6 +6,9 @@ services:
     name: stock-simple-api
     runtime: node
     plan: free
+    # Solo se deploya lo que llega a `production` (un release = PR main → production).
+    # El Blueprint también tiene que estar vinculado a esa rama (ver docs/DEPLOY.md).
+    branch: production
     # Misma región que la base de Neon (AWS us-east-1): cada consulta tarda ~1 ms en lugar de ~120 ms.
     region: virginia
     # --include=dev: con NODE_ENV=production npm omite las devDependencies, y el build necesita
