@@ -35,6 +35,8 @@ npm-workspaces monorepo:
 
 Gotchas: the Docker CLI on this Mac is at `/Applications/Docker.app/Contents/Resources/bin` (not on PATH) and Docker Desktop is often stopped after a reboot (`open -a Docker`). Prisma refuses `migrate reset` without explicit user consent — never bypass it. API tests run with Vitest + `unplugin-swc` (Nest 12 is ESM-only; Jest doesn't work).
 
-## Deployment (all free tier, auto-deploy on push to `main`)
+## Deployment (all free tier, auto-deploy on push to `production`)
+
+Git flow: never commit to `main` or `production` directly (rulesets enforce it). Each change goes in a `fix/…` or `feat/…` branch → PR to `main` (CI must pass). A release is a PR `main → production` merged with a merge commit (never squash); that is what deploys. `main` itself only gets a free Netlify branch deploy (`main--stock-simple-adrian.netlify.app`). Netlify production deploys cost 15 of 300 monthly credits, so batch PRs into weekly-ish releases.
 
 Netlify (web, `netlify.toml`, proxies `/api/*` → Render so the session cookie is first-party) · Render (API, `render.yaml` Blueprint, region virginia, migrations on start) · Neon (Postgres, AWS us-east-1 — must stay in the same region as the API). GitHub Actions: `ci.yml` (lint/types/unit/e2e + Docker build smoke test) and `reset-demo.yml` (reseeds Neon nightly at 07:00 UTC, secret `DEMO_DATABASE_URL`). Secrets live only in Render/GitHub settings; never commit `.env` and never type credentials into forms on the user's behalf.
