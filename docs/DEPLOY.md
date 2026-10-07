@@ -83,6 +83,23 @@ Entrá a tu URL de Netlify. La primera vez puede aparecer "Despertando el servid
 
 ---
 
+## 6. Releases: deployar cuando vos decidas
+
+Los dos servicios publican **solo** la rama `production`. `main` es la rama de trabajo: ahí se mergean los PRs (con el CI en verde) sin tocar lo publicado.
+
+| Rama | Para qué | Qué se publica |
+| --- | --- | --- |
+| `main` | Cada cambio entra por PR | Copia de prueba en `https://main--TU-SITIO.netlify.app` (gratis) |
+| `production` | Lo que ve la gente | El sitio público y la API de Render |
+
+**Para hacer un release:** en GitHub, **Pull requests → New pull request**, base `production` ← compare `main`. Título `Release AAAA-MM-DD`. Cuando el CI esté en verde, **Create a merge commit** (nunca squash: si no, las ramas se separan y el próximo release trae conflictos). Netlify y Render deployan solos. El historial de releases queda en los PRs mergeados a `production`.
+
+Configuración (una sola vez):
+
+1. GitHub: creá la rama `production` desde `main`. En **Settings → Rules → Rulesets** protegé `main` y `production`: PR obligatorio, checks *Lint, tipos y tests* e *Imágenes Docker* en verde, sin force push ni borrado; en `production`, solo merge commit.
+2. Netlify: **Project configuration → Build & deploy → Continuous deployment → Branches and deploy contexts**. Production branch `production`; Branch deploys: solo `main`; Deploy Previews: activados (son gratis, igual que los branch deploys).
+3. Render: en el Blueprint y en el servicio (**Settings → Build & Deploy → Branch**) elegí `production`. `render.yaml` ya lo indica con `branch: production`.
+
 ## Problemas frecuentes
 
 | Síntoma | Causa y solución |
@@ -95,6 +112,6 @@ Entrá a tu URL de Netlify. La primera vez puede aparecer "Despertando el servid
 
 ## Mantenerlo gratis
 
-- Cada `git push` a `main` dispara un deploy en Netlify (15 créditos) y en Render. Agrupá cambios antes de pushear.
+- Solo los releases (merge a `production`) consumen créditos de Netlify: 15 cada uno. Agrupá varios PRs por release (por ejemplo, uno por semana) y quedás muy lejos del límite. Los branch deploys, deploy previews y deploys fallidos no consumen.
 - No uses la base de Postgres de Render: se borra a los 30 días.
 - Para resetear la demo, volvé a correr el seed contra Neon (paso 2).
