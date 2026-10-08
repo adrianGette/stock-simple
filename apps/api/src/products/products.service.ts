@@ -3,15 +3,21 @@ import {
   type CreateProduct,
   type Paginated,
   type ProductDto,
+  type ProductExportQuery,
   type ProductQuery,
   type UpdateProductInput,
   can,
+  csvHeader,
+  csvRows,
 } from '@stock/shared'
 import type { RequestUser } from '../auth/auth.types'
 import { AppError } from '../common/app-error'
 import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { productCsvColumns } from './product.csv'
 import { toProductDto } from './product.mapper'
+
+const EXPORT_BATCH_SIZE = 500
 
 // El id al final desempata: sin un orden total, Postgres puede ordenar distinto los empates
 // en cada consulta y la paginación por offset repite o saltea productos.
@@ -26,9 +32,10 @@ const ORDER_BY: Record<ProductQuery['sort'], Prisma.ProductOrderByWithRelationIn
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(user: RequestUser, query: ProductQuery): Promise<Paginated<ProductDto>> {
+  /** Filtros de la lista. La exportación usa los mismos, así el archivo trae lo mismo que se ve en pantalla. */
+  private whereFor(user: RequestUser, query: ProductExportQuery): Prisma.ProductWhereInput {
     const fields = this.prisma.product.fields
-    const where: Prisma.ProductWhereInput = {
+    return {
       businessId: user.businessId,
       categoryId: query.categoryId,
       active: query.status === 'all' ? undefined : query.status === 'active',
@@ -42,7 +49,10 @@ export class ProductsService {
           ]
         : undefined,
     }
+  }
 
+  async list(user: RequestUser, query: ProductQuery): Promise<Paginated<ProductDto>> {
+    const where = this.whereFor(user, query)
     const [total, products] = await this.prisma.$transaction([
       this.prisma.product.count({ where }),
       this.prisma.product.findMany({
@@ -56,6 +66,35 @@ export class ProductsService {
 
     const includeCost = can(user.role, 'products:view-cost')
     return { items: products.map((p) => toProductDto(p, includeCost)), total, page: query.page, pageSize: query.pageSize }
+  }
+
+  /**
+   * CSV de productos generado de a lotes: en memoria hay un solo lote a la vez, sin importar cuántos
+   * productos tenga el comercio, y la descarga empieza apenas sale el primero.
+   *
+   * Los lotes se piden por cursor ("los que siguen después del último enviado", por nombre e id) y no
+   * por offset: no se vuelve más lento a medida que avanza y no repite ni saltea filas si mientras
+   * tanto se crean productos o cambia su stock.
+   */
+  async *exportCsv(user: RequestUser, query: ProductExportQuery): AsyncGenerator<string> {
+    const columns = productCsvColumns(can(user.role, 'products:view-cost'))
+    const where = this.whereFor(user, query)
+    yield csvHeader(columns)
+
+    let last: { name: string; id: string } | undefined
+    for (;;) {
+      const batch = await this.prisma.product.findMany({
+        where: last
+          ? { AND: [where, { OR: [{ name: { gt: last.name } }, { name: last.name, id: { gt: last.id } }] }] }
+          : where,
+        include: { category: { select: { id: true, name: true } } },
+        orderBy: [{ name: 'asc' }, { id: 'asc' }],
+        take: EXPORT_BATCH_SIZE,
+      })
+      if (batch.length > 0) yield csvRows(columns, batch)
+      if (batch.length < EXPORT_BATCH_SIZE) return
+      last = batch[batch.length - 1]
+    }
   }
 
   async get(user: RequestUser, id: string): Promise<ProductDto> {

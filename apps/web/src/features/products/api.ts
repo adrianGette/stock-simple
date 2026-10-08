@@ -11,7 +11,7 @@ import type {
   UpdateProductInput,
 } from '@stock/shared'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '../../lib/api-client'
+import { api, downloadFile } from '../../lib/api-client'
 
 export type ProductFilters = Partial<ProductQuery>
 
@@ -31,6 +31,11 @@ export function useProducts(filters: ProductFilters) {
     // Mientras llega la página nueva se mantiene la anterior: sin saltos de layout.
     placeholderData: keepPreviousData,
   })
+}
+
+/** Descarga el CSV con los mismos filtros que la lista (sin paginación: trae todo lo que coincide). */
+export function exportProducts({ q, stock, categoryId, status }: ProductFilters) {
+  return downloadFile('/products/export', { query: { q, stock, categoryId, status } })
 }
 
 export function useProduct(id: string) {
