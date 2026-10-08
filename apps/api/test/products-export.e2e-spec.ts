@@ -5,6 +5,12 @@ import request from 'supertest'
 import type { PrismaService } from '../src/prisma/prisma.service'
 import { type Fixture, auth, createFixture, createTestApp, resetDatabase } from './helpers'
 
+/** Separa el CSV en encabezado y filas (los datos de estos tests no llevan `;` ni saltos de línea). */
+function parse(text: string): { header: string[]; rows: string[][] } {
+  const [header = '', ...rows] = text.replace(CSV_BOM, '').split('\r\n').filter(Boolean)
+  return { header: header.split(';'), rows: rows.map((row) => row.split(';')) }
+}
+
 describe('Exportación de productos a CSV', () => {
   let app: INestApplication
   let prisma: PrismaService
@@ -19,12 +25,6 @@ describe('Exportación de productos a CSV', () => {
 
   const exportAs = (token: string, query: Record<string, string> = {}) =>
     request(app.getHttpServer()).get('/api/products/export').query(query).set(auth(token))
-
-  /** Separa el CSV en encabezado y filas (los datos de estos tests no llevan `;` ni saltos de línea). */
-  function parse(text: string): { header: string[]; rows: string[][] } {
-    const [header = '', ...rows] = text.replace(CSV_BOM, '').split('\r\n').filter(Boolean)
-    return { header: header.split(';'), rows: rows.map((row) => row.split(';')) }
-  }
 
   it('descarga un CSV compatible con Excel en español', async () => {
     await shop.product({ priceCents: 125_050, costCents: 60_000, stock: 7, minStock: 2 })
@@ -98,7 +98,7 @@ describe('Exportación de productos a CSV', () => {
   })
 
   it('rechaza filtros inválidos y pedidos sin sesión', async () => {
-    await exportAs(shop.tokens.OWNER, { stock: 'cualquiera' }).expect(400)
-    await request(app.getHttpServer()).get('/api/products/export').expect(401)
+    expect((await exportAs(shop.tokens.OWNER, { stock: 'cualquiera' })).status).toBe(400)
+    expect((await request(app.getHttpServer()).get('/api/products/export')).status).toBe(401)
   })
 })
