@@ -11,9 +11,10 @@
   align-items: start;
 }
 
+/* Las dos cantidades arriba; el valor del inventario (la cifra más larga) abajo, a todo el ancho. */
 .stockSummary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
@@ -21,16 +22,24 @@
 .stockFigure {
   display: grid;
   gap: 2px;
+  min-width: 0;
   padding: var(--space-3);
   border-radius: var(--radius-md);
   background: var(--color-surface-2);
   font-size: var(--text-xs);
   color: var(--color-ink-2);
+  container-type: inline-size;
 }
 
+.stockFigure:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
+/* La cifra se achica con el ancho de su caja (cqi) y, como último recurso, corta línea. */
 .stockFigure strong {
-  font-size: var(--text-lg);
+  font-size: clamp(var(--text-md), 14cqi, var(--text-lg));
   color: var(--color-ink);
+  overflow-wrap: anywhere;
 }
 
 .lowList {
