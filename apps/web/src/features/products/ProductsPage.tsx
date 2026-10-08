@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { formatMoney, formatPercent } from '../../lib/format'
 import { useDebouncedValue } from '../../shared/hooks/useDebouncedValue'
+import { useDownload } from '../../shared/hooks/useDownload'
 import { Button } from '../../shared/ui/Button'
 import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
 import { SearchInput, Select } from '../../shared/ui/Field'
@@ -14,7 +15,7 @@ import { useCurrentUser } from '../auth/AuthProvider'
 import { CategoriesDialog } from './CategoriesDialog'
 import { ProductFormDialog } from './ProductFormDialog'
 import { StockBadge } from './StockBadge'
-import { type ProductFilters, useCategories, useProducts } from './api'
+import { type ProductFilters, exportProducts, useCategories, useProducts } from './api'
 import styles from './products.module.css'
 
 const STOCK_FILTERS = [
@@ -57,6 +58,8 @@ export function ProductsPage() {
   const products = useProducts(filters)
   const categories = useCategories()
 
+  const exporting = useDownload()
+
   // La búsqueda se escribe en la URL con debounce, para no generar una entrada de historial por tecla.
   const urlQuery = params.get('q') ?? ''
   useEffect(() => {
@@ -70,16 +73,21 @@ export function ProductsPage() {
         title="Productos"
         subtitle="Catálogo, precios y existencias."
         actions={
-          canWrite && (
-            <>
-              <Button icon="layers" onClick={() => setManagingCategories(true)}>
-                Categorías
-              </Button>
-              <Button variant="primary" icon="plus" onClick={() => setCreating(true)}>
-                Nuevo producto
-              </Button>
-            </>
-          )
+          <>
+            <Button icon="download" loading={exporting.downloading} onClick={() => exporting.download(() => exportProducts(filters))}>
+              Exportar
+            </Button>
+            {canWrite && (
+              <>
+                <Button icon="layers" onClick={() => setManagingCategories(true)}>
+                  Categorías
+                </Button>
+                <Button variant="primary" icon="plus" onClick={() => setCreating(true)}>
+                  Nuevo producto
+                </Button>
+              </>
+            )}
+          </>
         }
       />
 

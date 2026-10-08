@@ -2,14 +2,26 @@ import { z } from 'zod'
 import { isoDate } from './common'
 import type { PaymentMethod } from './sales'
 
-export const reportRangeSchema = z
-  .object({ from: isoDate, to: isoDate })
-  .refine((v) => v.from <= v.to, { message: 'La fecha inicial es posterior a la final', path: ['from'] })
-  .refine(
-    (v) => (Date.parse(v.to) - Date.parse(v.from)) / 86_400_000 <= 366,
-    { message: 'El rango máximo es de un año', path: ['to'] },
-  )
+const range = { from: isoDate, to: isoDate }
+
+function validRange<T extends z.ZodType<{ from: string; to: string }>>(schema: T) {
+  return schema
+    .refine((v) => v.from <= v.to, { message: 'La fecha inicial es posterior a la final', path: ['from'] })
+    .refine(
+      (v) => (Date.parse(v.to) - Date.parse(v.from)) / 86_400_000 <= 366,
+      { message: 'El rango máximo es de un año', path: ['to'] },
+    )
+}
+
+export const reportRangeSchema = validRange(z.object(range))
 export type ReportRange = z.infer<typeof reportRangeSchema>
+
+/** Cada sección del reporte se descarga como un CSV aparte: una tabla por archivo se puede filtrar y sumar en la planilla. */
+export const REPORT_SECTIONS = ['daily', 'categories', 'payments', 'products'] as const
+export type ReportSection = (typeof REPORT_SECTIONS)[number]
+
+export const reportExportQuerySchema = validRange(z.object({ ...range, section: z.enum(REPORT_SECTIONS) }))
+export type ReportExportQuery = z.infer<typeof reportExportQuerySchema>
 
 export interface DashboardDto {
   today: { revenueCents: number; salesCount: number; averageTicketCents: number; profitCents?: number }

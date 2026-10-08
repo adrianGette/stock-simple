@@ -31,6 +31,7 @@ const PATHS = {
   scan: 'M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M11 8v8M15 8v8M18 8v8',
   undo: 'M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13',
   layers: 'm12 2 10 5-10 5L2 7zM2 17l10 5 10-5M2 12l10 5 10-5',
+  download: 'M12 3v12M7 10l5 5 5-5M4 21h16',
   cash: 'M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 12h.01M18 12h.01',
 } as const
 

@@ -1,6 +1,6 @@
-import type { DashboardDto, ReportRange, SalesReportDto } from '@stock/shared'
+import type { DashboardDto, ReportRange, ReportSection, SalesReportDto } from '@stock/shared'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { api } from '../../lib/api-client'
+import { api, downloadFile } from '../../lib/api-client'
 
 export const reportKeys = {
   dashboard: ['reports', 'dashboard'] as const,
@@ -14,6 +14,10 @@ export function useDashboard() {
     // El tablero queda abierto en el mostrador: se refresca solo cada minuto.
     refetchInterval: 60_000,
   })
+}
+
+export function exportReport(section: ReportSection, range: ReportRange) {
+  return downloadFile('/reports/sales/export', { query: { ...range, section } })
 }
 
 export function useSalesReport(range: ReportRange) {

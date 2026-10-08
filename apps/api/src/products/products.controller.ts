@@ -1,13 +1,17 @@
-import { Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { Readable } from 'node:stream'
+import { Controller, Get, Header, Param, ParseUUIDPipe, Patch, Post, Query, StreamableFile } from '@nestjs/common'
+import { ApiBearerAuth, ApiProduces, ApiTags } from '@nestjs/swagger'
 import {
   type CreateProduct,
   type Paginated,
   type ProductDto,
+  type ProductExportQuery,
   type ProductQuery,
   type UpdateProductInput,
   createProductSchema,
+  productExportQuerySchema,
   productQuerySchema,
+  toLocalIsoDate,
   updateProductSchema,
 } from '@stock/shared'
 import type { RequestUser } from '../auth/auth.types'
@@ -32,6 +36,22 @@ export class ProductsController {
   @RequirePermissions('products:read')
   lookup(@CurrentUser() user: RequestUser, @Query('code') code = ''): Promise<ProductDto> {
     return this.products.lookup(user, code)
+  }
+
+  @Get('export')
+  @RequirePermissions('products:read')
+  @ApiZodQuery(productExportQuerySchema)
+  @ApiProduces('text/csv')
+  @Header('Cache-Control', 'no-store')
+  export(
+    @CurrentUser() user: RequestUser,
+    @ZodQuery(productExportQuerySchema) query: ProductExportQuery,
+  ): StreamableFile {
+    const filename = `productos-${toLocalIsoDate(new Date())}.csv`
+    return new StreamableFile(Readable.from(this.products.exportCsv(user, query)), {
+      type: 'text/csv; charset=utf-8',
+      disposition: `attachment; filename="${filename}"`,
+    })
   }
 
   @Get(':id')

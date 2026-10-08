@@ -49,6 +49,13 @@ export const productQuerySchema = z.object({
 })
 export type ProductQuery = z.infer<typeof productQuerySchema>
 
+/**
+ * Mismos filtros que la lista, sin paginación ni orden: se exporta todo lo que coincide, siempre
+ * ordenado por nombre (un orden que no cambia con las ventas que ocurran durante la descarga).
+ */
+export const productExportQuerySchema = productQuerySchema.omit({ sort: true, page: true, pageSize: true })
+export type ProductExportQuery = z.infer<typeof productExportQuerySchema>
+
 export interface ProductDto {
   id: string
   sku: string

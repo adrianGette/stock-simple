@@ -140,7 +140,30 @@ export interface RequestOptions {
   signal?: AbortSignal
 }
 
-export async function api<T>(path: string, options: RequestOptions = {}, retried = false): Promise<T> {
+export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const response = await request(path, options)
+  if (response.status === 204) return undefined as T
+  return (await response.json()) as T
+}
+
+/**
+ * Descarga un archivo de la API. Va por `fetch` y no por un link común porque necesita el token,
+ * que vive en memoria; después se le entrega al navegador como si fuera un link de descarga.
+ */
+export async function downloadFile(path: string, options: RequestOptions = {}): Promise<void> {
+  const response = await request(path, options)
+  const filename = /filename="([^"]+)"/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? 'descarga'
+  const url = URL.createObjectURL(await response.blob())
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  // Se libera en el próximo ciclo: algunos navegadores todavía están leyendo el blob al volver de click().
+  setTimeout(() => URL.revokeObjectURL(url))
+}
+
+/** Hace la request con el token, reintenta si el servidor se estaba despertando o si la sesión venció, y normaliza los errores. */
+async function request(path: string, options: RequestOptions, retried = false): Promise<Response> {
   const url = new URL(`${BASE_URL}${path}`, window.location.origin)
   for (const [key, value] of Object.entries(options.query ?? {})) {
     if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, String(value))
@@ -162,12 +185,12 @@ export async function api<T>(path: string, options: RequestOptions = {}, retried
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     // Las lecturas se reintentan solas una vez que el servidor despertó.
-    if (method === 'GET' && !retried && (await waitForServer())) return api<T>(path, options, true)
+    if (method === 'GET' && !retried && (await waitForServer())) return request(path, options, true)
     throw new ApiError(0, 'INTERNAL_ERROR', 'No hay conexión con el servidor. Revisá tu conexión e intentá de nuevo.')
   }
 
   if (isWakingResponse(response.status)) {
-    if (method === 'GET' && !retried && (await waitForServer())) return api<T>(path, options, true)
+    if (method === 'GET' && !retried && (await waitForServer())) return request(path, options, true)
     // Las escrituras no se reintentan solas (podrían duplicarse); el usuario reintenta.
     void waitForServer()
     throw new ApiError(response.status, 'INTERNAL_ERROR', 'El servidor se está despertando. Probá de nuevo en unos segundos.')
@@ -175,7 +198,7 @@ export async function api<T>(path: string, options: RequestOptions = {}, retried
 
   if (response.status === 401 && !retried && !path.startsWith('/auth/')) {
     const renewed = await refreshSession()
-    if (renewed) return api<T>(path, options, true)
+    if (renewed) return request(path, options, true)
   }
 
   if (!response.ok) {
@@ -188,8 +211,7 @@ export async function api<T>(path: string, options: RequestOptions = {}, retried
     )
   }
 
-  if (response.status === 204) return undefined as T
-  return (await response.json()) as T
+  return response
 }
 
 export function errorMessage(error: unknown): string {
