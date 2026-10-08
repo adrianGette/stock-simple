@@ -4,6 +4,7 @@ import { z } from 'zod'
 z.config(z.locales.es())
 
 export * from './money'
+export * from './csv'
 export * from './pricing'
 export * from './permissions'
 export * from './dates'

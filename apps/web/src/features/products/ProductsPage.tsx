@@ -1,6 +1,7 @@
 import { marginPercent } from '@stock/shared'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
+import { errorMessage } from '../../lib/api-client'
 import { formatMoney, formatPercent } from '../../lib/format'
 import { useDebouncedValue } from '../../shared/hooks/useDebouncedValue'
 import { Button } from '../../shared/ui/Button'
@@ -9,12 +10,13 @@ import { SearchInput, Select } from '../../shared/ui/Field'
 import { Card, Page, PageHeader, Toolbar, layoutStyles } from '../../shared/ui/Layout'
 import { Pagination } from '../../shared/ui/Pagination'
 import { SegmentedControl } from '../../shared/ui/SegmentedControl'
+import { useToast } from '../../shared/ui/Toast'
 import table from '../../shared/ui/table.module.css'
 import { useCurrentUser } from '../auth/AuthProvider'
 import { CategoriesDialog } from './CategoriesDialog'
 import { ProductFormDialog } from './ProductFormDialog'
 import { StockBadge } from './StockBadge'
-import { type ProductFilters, useCategories, useProducts } from './api'
+import { type ProductFilters, exportProducts, useCategories, useProducts } from './api'
 import styles from './products.module.css'
 
 const STOCK_FILTERS = [
@@ -57,6 +59,19 @@ export function ProductsPage() {
   const products = useProducts(filters)
   const categories = useCategories()
 
+  const toast = useToast()
+  const [exporting, setExporting] = useState(false)
+  async function handleExport() {
+    setExporting(true)
+    try {
+      await exportProducts(filters)
+    } catch (error) {
+      toast.error(errorMessage(error))
+    } finally {
+      setExporting(false)
+    }
+  }
+
   // La búsqueda se escribe en la URL con debounce, para no generar una entrada de historial por tecla.
   const urlQuery = params.get('q') ?? ''
   useEffect(() => {
@@ -70,16 +85,21 @@ export function ProductsPage() {
         title="Productos"
         subtitle="Catálogo, precios y existencias."
         actions={
-          canWrite && (
-            <>
-              <Button icon="layers" onClick={() => setManagingCategories(true)}>
-                Categorías
-              </Button>
-              <Button variant="primary" icon="plus" onClick={() => setCreating(true)}>
-                Nuevo producto
-              </Button>
-            </>
-          )
+          <>
+            <Button icon="download" loading={exporting} onClick={handleExport}>
+              Exportar
+            </Button>
+            {canWrite && (
+              <>
+                <Button icon="layers" onClick={() => setManagingCategories(true)}>
+                  Categorías
+                </Button>
+                <Button variant="primary" icon="plus" onClick={() => setCreating(true)}>
+                  Nuevo producto
+                </Button>
+              </>
+            )}
+          </>
         }
       />
 
