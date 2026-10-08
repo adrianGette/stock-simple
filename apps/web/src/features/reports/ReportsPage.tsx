@@ -9,6 +9,7 @@ import { SegmentedControl } from '../../shared/ui/SegmentedControl'
 import { StatTile } from '../../shared/ui/StatTile'
 import table from '../../shared/ui/table.module.css'
 import { DailySalesChart } from './DailySalesChart'
+import { ReportExportButton } from './ReportExportButton'
 import styles from './ReportsPage.module.css'
 import { useSalesReport } from './api'
 
@@ -16,7 +17,8 @@ const PRESETS = RANGE_PRESETS.filter((p) => p.value !== 'today')
 
 export function ReportsPage() {
   const [preset, setPreset] = useState<RangePreset>('30d')
-  const report = useSalesReport(rangeFor(preset))
+  const range = rangeFor(preset)
+  const report = useSalesReport(range)
 
   return (
     <Page>
@@ -44,11 +46,19 @@ export function ReportsPage() {
           })()}
 
           <div className={styles.grid}>
-            <Card title="Ventas por día" className={styles.wide}>
+            <Card
+              title="Ventas por día"
+              className={styles.wide}
+              action={<ReportExportButton section="daily" range={range} description="ventas por día" />}
+            >
               <DailySalesChart daily={report.data.daily} height={260} />
             </Card>
 
-            <Card title="Por categoría" description="Ventas del período">
+            <Card
+              title="Por categoría"
+              description="Ventas del período"
+              action={<ReportExportButton section="categories" range={range} description="ventas por categoría" />}
+            >
               {report.data.byCategory.length ? (
                 <BarList
                   showShare
@@ -60,7 +70,11 @@ export function ReportsPage() {
               )}
             </Card>
 
-            <Card title="Medios de pago" description="Ventas del período">
+            <Card
+              title="Medios de pago"
+              description="Ventas del período"
+              action={<ReportExportButton section="payments" range={range} description="ventas por medio de pago" />}
+            >
               {report.data.byPaymentMethod.length ? (
                 <BarList
                   showShare
@@ -72,7 +86,13 @@ export function ReportsPage() {
               )}
             </Card>
 
-            <Card title="Productos que más venden" flush className={styles.wide}>
+            <Card
+              title="Productos que más venden"
+              flush
+              className={styles.wide}
+              // La descarga trae todos los productos vendidos del período, no solo los de la tabla.
+              action={<ReportExportButton section="products" range={range} description="todos los productos vendidos" />}
+            >
               {report.data.topProducts.length ? (
                 <table className={table.table}>
                   <thead>

@@ -1,16 +1,15 @@
 import { marginPercent } from '@stock/shared'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
-import { errorMessage } from '../../lib/api-client'
 import { formatMoney, formatPercent } from '../../lib/format'
 import { useDebouncedValue } from '../../shared/hooks/useDebouncedValue'
+import { useDownload } from '../../shared/hooks/useDownload'
 import { Button } from '../../shared/ui/Button'
 import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
 import { SearchInput, Select } from '../../shared/ui/Field'
 import { Card, Page, PageHeader, Toolbar, layoutStyles } from '../../shared/ui/Layout'
 import { Pagination } from '../../shared/ui/Pagination'
 import { SegmentedControl } from '../../shared/ui/SegmentedControl'
-import { useToast } from '../../shared/ui/Toast'
 import table from '../../shared/ui/table.module.css'
 import { useCurrentUser } from '../auth/AuthProvider'
 import { CategoriesDialog } from './CategoriesDialog'
@@ -59,18 +58,7 @@ export function ProductsPage() {
   const products = useProducts(filters)
   const categories = useCategories()
 
-  const toast = useToast()
-  const [exporting, setExporting] = useState(false)
-  async function handleExport() {
-    setExporting(true)
-    try {
-      await exportProducts(filters)
-    } catch (error) {
-      toast.error(errorMessage(error))
-    } finally {
-      setExporting(false)
-    }
-  }
+  const exporting = useDownload()
 
   // La búsqueda se escribe en la URL con debounce, para no generar una entrada de historial por tecla.
   const urlQuery = params.get('q') ?? ''
@@ -86,7 +74,7 @@ export function ProductsPage() {
         subtitle="Catálogo, precios y existencias."
         actions={
           <>
-            <Button icon="download" loading={exporting} onClick={handleExport}>
+            <Button icon="download" loading={exporting.downloading} onClick={() => exporting.download(() => exportProducts(filters))}>
               Exportar
             </Button>
             {canWrite && (

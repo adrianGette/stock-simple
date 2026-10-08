@@ -5,6 +5,7 @@ import type {
   DashboardDto,
   PaymentMethod,
   PaymentMethodRow,
+  ReportExportQuery,
   ReportRange,
   SalesReportDto,
   TopProductRow,
@@ -12,10 +13,23 @@ import type {
 import { addDays, toLocalIsoDate } from '@stock/shared'
 import type { RequestUser } from '../auth/auth.types'
 import { localDayRange, startOfLocalDay } from '../common/dates'
+import { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { CATEGORY_COLUMNS, DAILY_COLUMNS, PAYMENT_COLUMNS, PRODUCT_COLUMNS, toCsv } from './reports.csv'
 
 /** Postgres devuelve SUM/COUNT como bigint; los convertimos a number (seguro hasta 2^53). */
 const num = (value: bigint | number | null): number => Number(value ?? 0)
+
+const TOP_PRODUCTS = 10
+
+/** Comercio, zona horaria y período ya traducido a instantes UTC: lo que necesita cada consulta. */
+interface Scope {
+  business: string
+  tz: string
+  range: ReportRange
+  gte: Date
+  lt: Date
+}
 
 /**
  * Reportes con SQL agregado: se calcula en la base, no trayendo miles de filas a memoria.
@@ -73,94 +87,130 @@ export class ReportsService {
   }
 
   async sales(user: RequestUser, range: ReportRange): Promise<SalesReportDto> {
-    const { gte, lt } = localDayRange(range.from, range.to, user.timezone)
-    const tz = user.timezone
-    const business = user.businessId
-
-    const [[totals], daily, topProducts, byCategory, byPayment] = await Promise.all([
-      this.prisma.$queryRaw<{ revenue: bigint; profit: bigint; count: number; voided: number }[]>`
-        SELECT
-          COALESCE(SUM(total_cents) FILTER (WHERE status = 'COMPLETED'), 0) AS revenue,
-          COALESCE(SUM(total_cents - cost_cents) FILTER (WHERE status = 'COMPLETED'), 0) AS profit,
-          (COUNT(*) FILTER (WHERE status = 'COMPLETED'))::int AS count,
-          (COUNT(*) FILTER (WHERE status = 'VOIDED'))::int AS voided
-        FROM sales
-        WHERE business_id = ${business}::uuid AND created_at >= ${gte} AND created_at < ${lt}`,
-      // generate_series completa los días sin ventas con cero, para que el gráfico no tenga huecos.
-      this.prisma.$queryRaw<{ date: string; revenue: bigint; profit: bigint; count: number }[]>`
-        WITH days AS (
-          SELECT generate_series(${range.from}::date, ${range.to}::date, interval '1 day')::date AS day
-        ),
-        agg AS (
-          SELECT (created_at AT TIME ZONE ${tz})::date AS day,
-                 SUM(total_cents) AS revenue,
-                 SUM(total_cents - cost_cents) AS profit,
-                 COUNT(*)::int AS count
-          FROM sales
-          WHERE business_id = ${business}::uuid AND status = 'COMPLETED' AND created_at >= ${gte} AND created_at < ${lt}
-          GROUP BY 1
-        )
-        SELECT to_char(days.day, 'YYYY-MM-DD') AS date,
-               COALESCE(agg.revenue, 0) AS revenue,
-               COALESCE(agg.profit, 0) AS profit,
-               COALESCE(agg.count, 0) AS count
-        FROM days LEFT JOIN agg USING (day)
-        ORDER BY days.day`,
-      this.prisma.$queryRaw<{ product_id: string; name: string; sku: string; quantity: number; revenue: bigint; profit: bigint }[]>`
-        SELECT si.product_id, MAX(si.product_name) AS name, MAX(si.sku) AS sku,
-               SUM(si.quantity)::int AS quantity,
-               SUM(si.subtotal_cents) AS revenue,
-               SUM(si.subtotal_cents - si.unit_cost_cents * si.quantity) AS profit
-        FROM sale_items si JOIN sales s ON s.id = si.sale_id
-        WHERE s.business_id = ${business}::uuid AND s.status = 'COMPLETED' AND s.created_at >= ${gte} AND s.created_at < ${lt}
-        GROUP BY si.product_id
-        ORDER BY revenue DESC
-        LIMIT 10`,
-      this.prisma.$queryRaw<{ category_id: string | null; name: string; revenue: bigint; profit: bigint }[]>`
-        SELECT c.id AS category_id, COALESCE(c.name, 'Sin categoría') AS name,
-               SUM(si.subtotal_cents) AS revenue,
-               SUM(si.subtotal_cents - si.unit_cost_cents * si.quantity) AS profit
-        FROM sale_items si
-        JOIN sales s ON s.id = si.sale_id
-        JOIN products p ON p.id = si.product_id
-        LEFT JOIN categories c ON c.id = p.category_id
-        WHERE s.business_id = ${business}::uuid AND s.status = 'COMPLETED' AND s.created_at >= ${gte} AND s.created_at < ${lt}
-        GROUP BY c.id, c.name
-        ORDER BY revenue DESC`,
-      this.prisma.$queryRaw<{ method: PaymentMethod; revenue: bigint; count: number }[]>`
-        SELECT payment_method::text AS method, SUM(total_cents) AS revenue, COUNT(*)::int AS count
-        FROM sales
-        WHERE business_id = ${business}::uuid AND status = 'COMPLETED' AND created_at >= ${gte} AND created_at < ${lt}
-        GROUP BY payment_method
-        ORDER BY revenue DESC`,
+    const scope = this.scope(user, range)
+    const [totals, daily, topProducts, byCategory, byPaymentMethod] = await Promise.all([
+      this.totals(scope),
+      this.daily(scope),
+      this.productSales(scope, TOP_PRODUCTS),
+      this.categorySales(scope),
+      this.paymentSales(scope),
     ])
+    return { range, totals, daily, topProducts, byCategory, byPaymentMethod }
+  }
 
+  /**
+   * Una sección del reporte como CSV. Los datos ya vienen agregados por la base (a lo sumo un año de
+   * días o un renglón por producto vendido), así que entran cómodos en memoria: no hace falta streaming.
+   * A diferencia de la pantalla, "productos" trae todos los vendidos, no solo el top.
+   */
+  async salesCsv(user: RequestUser, { section, ...range }: ReportExportQuery): Promise<string> {
+    const scope = this.scope(user, range)
+    switch (section) {
+      case 'daily':
+        return toCsv(DAILY_COLUMNS, await this.daily(scope))
+      case 'categories':
+        return toCsv(CATEGORY_COLUMNS, await this.categorySales(scope))
+      case 'payments':
+        return toCsv(PAYMENT_COLUMNS, await this.paymentSales(scope))
+      case 'products':
+        return toCsv(PRODUCT_COLUMNS, await this.productSales(scope))
+    }
+  }
+
+  private scope(user: RequestUser, range: ReportRange): Scope {
+    return { business: user.businessId, tz: user.timezone, range, ...localDayRange(range.from, range.to, user.timezone) }
+  }
+
+  private async totals({ business, gte, lt }: Scope): Promise<SalesReportDto['totals']> {
+    const [totals] = await this.prisma.$queryRaw<{ revenue: bigint; profit: bigint; count: number; voided: number }[]>`
+      SELECT
+        COALESCE(SUM(total_cents) FILTER (WHERE status = 'COMPLETED'), 0) AS revenue,
+        COALESCE(SUM(total_cents - cost_cents) FILTER (WHERE status = 'COMPLETED'), 0) AS profit,
+        (COUNT(*) FILTER (WHERE status = 'COMPLETED'))::int AS count,
+        (COUNT(*) FILTER (WHERE status = 'VOIDED'))::int AS voided
+      FROM sales
+      WHERE business_id = ${business}::uuid AND created_at >= ${gte} AND created_at < ${lt}`
     const revenueCents = num(totals?.revenue ?? 0)
     const salesCount = totals?.count ?? 0
     return {
-      range,
-      totals: {
-        revenueCents,
-        profitCents: num(totals?.profit ?? 0),
-        salesCount,
-        averageTicketCents: salesCount ? Math.round(revenueCents / salesCount) : 0,
-        voidedCount: totals?.voided ?? 0,
-      },
-      daily: daily.map((d): DailySalesRow => ({ date: d.date, revenueCents: num(d.revenue), profitCents: num(d.profit), salesCount: d.count })),
-      topProducts: topProducts.map(
-        (p): TopProductRow => ({
-          productId: p.product_id,
-          name: p.name,
-          sku: p.sku,
-          quantity: p.quantity,
-          revenueCents: num(p.revenue),
-          profitCents: num(p.profit),
-        }),
-      ),
-      byCategory: byCategory.map(
-        (c): CategorySalesRow => ({ categoryId: c.category_id, name: c.name, revenueCents: num(c.revenue), profitCents: num(c.profit) }),
-      ),
-      byPaymentMethod: byPayment.map((m): PaymentMethodRow => ({ method: m.method, revenueCents: num(m.revenue), salesCount: m.count })),
+      revenueCents,
+      profitCents: num(totals?.profit ?? 0),
+      salesCount,
+      averageTicketCents: salesCount ? Math.round(revenueCents / salesCount) : 0,
+      voidedCount: totals?.voided ?? 0,
     }
+  }
+
+  private async daily({ business, tz, range, gte, lt }: Scope): Promise<DailySalesRow[]> {
+    // generate_series completa los días sin ventas con cero, para que el gráfico no tenga huecos.
+    const rows = await this.prisma.$queryRaw<{ date: string; revenue: bigint; profit: bigint; count: number }[]>`
+      WITH days AS (
+        SELECT generate_series(${range.from}::date, ${range.to}::date, interval '1 day')::date AS day
+      ),
+      agg AS (
+        SELECT (created_at AT TIME ZONE ${tz})::date AS day,
+               SUM(total_cents) AS revenue,
+               SUM(total_cents - cost_cents) AS profit,
+               COUNT(*)::int AS count
+        FROM sales
+        WHERE business_id = ${business}::uuid AND status = 'COMPLETED' AND created_at >= ${gte} AND created_at < ${lt}
+        GROUP BY 1
+      )
+      SELECT to_char(days.day, 'YYYY-MM-DD') AS date,
+             COALESCE(agg.revenue, 0) AS revenue,
+             COALESCE(agg.profit, 0) AS profit,
+             COALESCE(agg.count, 0) AS count
+      FROM days LEFT JOIN agg USING (day)
+      ORDER BY days.day`
+    return rows.map((d) => ({ date: d.date, revenueCents: num(d.revenue), profitCents: num(d.profit), salesCount: d.count }))
+  }
+
+  /** Productos vendidos en el período, de mayor a menor facturación. Sin `limit`, trae todos. */
+  private async productSales({ business, gte, lt }: Scope, limit?: number): Promise<TopProductRow[]> {
+    const rows = await this.prisma.$queryRaw<
+      { product_id: string; name: string; sku: string; quantity: number; revenue: bigint; profit: bigint }[]
+    >`
+      SELECT si.product_id, MAX(si.product_name) AS name, MAX(si.sku) AS sku,
+             SUM(si.quantity)::int AS quantity,
+             SUM(si.subtotal_cents) AS revenue,
+             SUM(si.subtotal_cents - si.unit_cost_cents * si.quantity) AS profit
+      FROM sale_items si JOIN sales s ON s.id = si.sale_id
+      WHERE s.business_id = ${business}::uuid AND s.status = 'COMPLETED' AND s.created_at >= ${gte} AND s.created_at < ${lt}
+      GROUP BY si.product_id
+      ORDER BY revenue DESC, si.product_id
+      ${limit ? Prisma.sql`LIMIT ${limit}` : Prisma.empty}`
+    return rows.map((p) => ({
+      productId: p.product_id,
+      name: p.name,
+      sku: p.sku,
+      quantity: p.quantity,
+      revenueCents: num(p.revenue),
+      profitCents: num(p.profit),
+    }))
+  }
+
+  private async categorySales({ business, gte, lt }: Scope): Promise<CategorySalesRow[]> {
+    const rows = await this.prisma.$queryRaw<{ category_id: string | null; name: string; revenue: bigint; profit: bigint }[]>`
+      SELECT c.id AS category_id, COALESCE(c.name, 'Sin categoría') AS name,
+             SUM(si.subtotal_cents) AS revenue,
+             SUM(si.subtotal_cents - si.unit_cost_cents * si.quantity) AS profit
+      FROM sale_items si
+      JOIN sales s ON s.id = si.sale_id
+      JOIN products p ON p.id = si.product_id
+      LEFT JOIN categories c ON c.id = p.category_id
+      WHERE s.business_id = ${business}::uuid AND s.status = 'COMPLETED' AND s.created_at >= ${gte} AND s.created_at < ${lt}
+      GROUP BY c.id, c.name
+      ORDER BY revenue DESC`
+    return rows.map((c) => ({ categoryId: c.category_id, name: c.name, revenueCents: num(c.revenue), profitCents: num(c.profit) }))
+  }
+
+  private async paymentSales({ business, gte, lt }: Scope): Promise<PaymentMethodRow[]> {
+    const rows = await this.prisma.$queryRaw<{ method: PaymentMethod; revenue: bigint; count: number }[]>`
+      SELECT payment_method::text AS method, SUM(total_cents) AS revenue, COUNT(*)::int AS count
+      FROM sales
+      WHERE business_id = ${business}::uuid AND status = 'COMPLETED' AND created_at >= ${gte} AND created_at < ${lt}
+      GROUP BY payment_method
+      ORDER BY revenue DESC`
+    return rows.map((m) => ({ method: m.method, revenueCents: num(m.revenue), salesCount: m.count }))
   }
 }
