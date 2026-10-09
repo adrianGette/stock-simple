@@ -12,7 +12,7 @@
   background: var(--color-surface);
   color: var(--color-ink);
   font-size: var(--text-sm);
-  box-shadow: var(--shadow-hard);
+  box-shadow: var(--shadow-md);
 }
 
 .spinner {

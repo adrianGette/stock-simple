@@ -25,7 +25,9 @@ test('la sesión sobrevive a una recarga y se puede cerrar', async ({ page }) =>
   await page.reload()
   await expect(page).toHaveURL('/inicio')
 
-  await page.getByRole('button', { name: 'Salir' }).click()
+  // Cerrar sesión vive en el menú de la tarjeta del usuario, abajo de la barra lateral.
+  await page.getByRole('button', { name: /^Menú de / }).click()
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
   await expect(page).toHaveURL(/ingresar/)
   await page.goto('/productos')
   await expect(page).toHaveURL(/ingresar/)

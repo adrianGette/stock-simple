@@ -14,7 +14,7 @@
 .searchInput input {
   height: 3.25rem;
   font-size: var(--text-lg);
-  box-shadow: var(--shadow-hard);
+  box-shadow: var(--shadow-md);
 }
 
 .searchHint {

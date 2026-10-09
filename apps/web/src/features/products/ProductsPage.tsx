@@ -6,7 +6,7 @@ import { useDebouncedValue } from '../../shared/hooks/useDebouncedValue'
 import { useDownload } from '../../shared/hooks/useDownload'
 import { useQueryParams } from '../../shared/hooks/useQueryParams'
 import { Button } from '../../shared/ui/Button'
-import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
+import { EmptyState, ErrorState, TableSkeleton } from '../../shared/ui/Feedback'
 import { SearchInput, Select } from '../../shared/ui/Field'
 import { Card, Page, PageHeader, Toolbar, layoutStyles } from '../../shared/ui/Layout'
 import { Pagination } from '../../shared/ui/Pagination'
@@ -160,7 +160,7 @@ export function ProductsPage() {
 
       <Card flush>
         {products.isPending ? (
-          <LoadingState />
+          <TableSkeleton columns={5} />
         ) : products.isError ? (
           <ErrorState error={products.error} onRetry={() => products.refetch()} />
         ) : products.data.items.length === 0 ? (

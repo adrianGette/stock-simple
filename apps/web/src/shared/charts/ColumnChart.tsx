@@ -1,6 +1,6 @@
 /* oxlint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex --
    El gráfico es enfocable para recorrer los días con las flechas; los mismos datos están en la vista de tabla. */
-import { type KeyboardEvent, type ReactNode, useState } from 'react'
+import { type KeyboardEvent, type ReactNode, useId, useState } from 'react'
 import styles from './charts.module.css'
 import { niceTicks } from './scale'
 import { useElementWidth } from './useElementWidth'
@@ -18,11 +18,13 @@ interface ColumnChartProps<T extends ColumnDatum> {
   height?: number
   formatTick: (value: number) => string
   renderTooltip: (datum: T) => ReactNode
+  /** Resalta la última columna (p. ej. el día de hoy) con el color de acento. */
+  highlightLast?: boolean
 }
 
 const MARGIN = { top: 8, right: 4, bottom: 24, left: 56 }
 const MAX_BAR = 24
-const RADIUS = 2
+const RADIUS = 4
 
 /** Columna con extremo superior redondeado (4px) y base recta sobre el eje. */
 function columnPath(x: number, y: number, width: number, height: number): string {
@@ -34,7 +36,16 @@ function columnPath(x: number, y: number, width: number, height: number): string
  * Gráfico de columnas de una serie, en SVG propio: sin dependencias, con tooltip al pasar el
  * mouse o al navegar con las flechas del teclado (el gráfico es enfocable).
  */
-export function ColumnChart<T extends ColumnDatum>({ data, ariaLabel, height = 220, formatTick, renderTooltip }: ColumnChartProps<T>) {
+export function ColumnChart<T extends ColumnDatum>({
+  data,
+  ariaLabel,
+  height = 220,
+  formatTick,
+  renderTooltip,
+  highlightLast = false,
+}: ColumnChartProps<T>) {
+  // Ids únicos para los degradados: puede haber varios gráficos en la misma pantalla.
+  const gradientId = useId()
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const [active, setActive] = useState<number | null>(null)
 
@@ -73,6 +84,16 @@ export function ColumnChart<T extends ColumnDatum>({ data, ariaLabel, height = 2
     >
       {width > 0 && (
         <svg width={width} height={height} aria-hidden>
+          <defs>
+            <linearGradient id={`${gradientId}-soft`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" className={styles.softTop} />
+              <stop offset="1" className={styles.softBottom} />
+            </linearGradient>
+            <linearGradient id={`${gradientId}-strong`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" className={styles.strongTop} />
+              <stop offset="1" className={styles.strongBottom} />
+            </linearGradient>
+          </defs>
           {ticks.map((tick) => (
             <g key={tick}>
               <line className={tick === 0 ? styles.baseline : styles.grid} x1={MARGIN.left} x2={width - MARGIN.right} y1={y(tick)} y2={y(tick)} />
@@ -88,7 +109,8 @@ export function ColumnChart<T extends ColumnDatum>({ data, ariaLabel, height = 2
               <g key={datum.key}>
                 {datum.value > 0 && (
                   <path
-                    className={[styles.column, index === active && styles.active].filter(Boolean).join(' ')}
+                    className={styles.column}
+                    fill={`url(#${gradientId}-${index === active || (highlightLast && index === data.length - 1) ? 'strong' : 'soft'})`}
                     d={columnPath(x, top, barWidth, MARGIN.top + innerHeight - top)}
                   />
                 )}

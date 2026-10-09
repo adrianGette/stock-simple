@@ -4,6 +4,14 @@
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
+  animation: page-in var(--duration-base) var(--ease-out);
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
 }
 
 .header {
@@ -40,6 +48,7 @@
   background: var(--color-surface);
   border: var(--stroke) solid var(--color-frame);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
   min-width: 0;
 }
 
