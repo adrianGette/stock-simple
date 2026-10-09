@@ -1,0 +1,22 @@
+# Cómo agrupa GitHub las notas automáticas de un release ("Generate release notes"):
+# los PRs mergeados desde el release anterior, por sección según su etiqueta.
+# https://docs.github.com/repositories/releasing-projects-on-github/automatically-generated-release-notes
+changelog:
+  exclude:
+    labels:
+      # El PR de release (main → production) no es un cambio en sí: el workflow de release le pone
+      # esta etiqueta para que no aparezca en sus propias notas.
+      - release
+  categories:
+    - title: Funcionalidades
+      labels:
+        - enhancement
+    - title: Arreglos
+      labels:
+        - bug
+    - title: Documentación
+      labels:
+        - documentation
+    - title: Otros cambios
+      labels:
+        - "*"

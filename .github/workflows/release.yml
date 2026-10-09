@@ -1,0 +1,70 @@
+name: Release
+
+# Al mergear el PR de release (main → production), publica el GitHub Release solo: lee la versión del
+# título del PR ("RELEASE v1.2.0 · 10-10-2026"), crea el tag sobre el commit del merge y genera las
+# notas agrupadas por etiqueta (ver .github/release.yml).
+on:
+  pull_request:
+    types: [closed]
+    branches: [production]
+
+# Solo lo necesario: crear el tag y el release (contents) y etiquetar el PR de release (pull-requests).
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Publicar release
+    # Un PR cerrado sin mergear no es un release.
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Leer la versión del título del PR
+        id: version
+        # El título va por variable de entorno y no con ${{ }} dentro del script: así el shell lo trata
+        # siempre como texto y un título malicioso no puede inyectar comandos.
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ "$TITLE" =~ ^RELEASE\ (v[0-9]+\.[0-9]+\.[0-9]+)\ ·\ ([0-9]{2}-[0-9]{2}-[0-9]{4})$ ]]; then
+            echo "tag=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "date=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+            echo "Versión: ${BASH_REMATCH[1]} (${BASH_REMATCH[2]})"
+          else
+            echo "::error title=Título de release inválido::El título tiene que ser 'RELEASE vX.Y.Z · DD-MM-YYYY' y es: $TITLE"
+            exit 1
+          fi
+
+      - name: Verificar que la versión sea nueva
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "::error title=Versión repetida::Ya existe el release $TAG. Subí el número de versión en el título del próximo PR de release."
+            exit 1
+          fi
+
+      - name: Etiquetar el PR de release (para que no aparezca en sus propias notas)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh label create release --repo "$GITHUB_REPOSITORY" --color 4F46E5 --description "PR de release (main → production)" --force
+          gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-label release
+
+      - name: Publicar el release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          DATE: ${{ steps.version.outputs.date }}
+          SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$SHA" \
+            --title "$TAG · $DATE" \
+            --generate-notes \
+            --latest
+          echo "::notice title=Release publicado::$TAG · $DATE"
