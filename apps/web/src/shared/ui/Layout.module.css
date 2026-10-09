@@ -22,6 +22,13 @@
   gap: var(--space-4);
 }
 
+/* Parte del ancho de su contenido (las acciones entran al lado, como siempre) y, cuando queda sola en su
+   línea (celular), crece hasta ocupar todo el ancho. */
+.heading {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .eyebrow {
   margin-bottom: var(--space-1);
   font-size: var(--text-sm);
@@ -36,6 +43,10 @@
 .subtitle {
   margin-top: var(--space-1);
   color: var(--color-ink-2);
+}
+
+.meta {
+  margin-top: var(--space-3);
 }
 
 .actions {

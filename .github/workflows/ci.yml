@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Permisos mínimos para el token del workflow: solo leer el código. Si una dependencia comprometida
+# corriera durante los tests, no podría escribir en el repo.
+permissions:
+  contents: read
+
 jobs:
   checks:
     name: Lint, tipos y tests

@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import { PRODUCT_IMPORT_MAX_BYTES, PROFILE_PHOTO_MAX_BYTES } from '@stock/shared'
+import { requireProxySignature } from './common/proxy-signature'
 import type { Env } from './config/env'
 
 /** Configuración compartida entre main.ts y los tests e2e, para probar exactamente lo que corre en producción. */
@@ -14,6 +15,9 @@ export function setupApp(app: INestApplication): void {
 
   // Detrás de los proxies del hosting: así el rate limit ve la IP real del cliente.
   express.set('trust proxy', config.get('TRUST_PROXY_HOPS', { infer: true }))
+  // En producción solo se aceptan pedidos que llegan por el proxy de Netlify (ver SECURITY.md).
+  const proxySecret = config.get('PROXY_SIGNATURE_SECRET', { infer: true })
+  if (proxySecret) app.use(requireProxySignature(proxySecret))
   app.use(helmet())
   app.use(cookieParser())
   // Los CSV de importación llegan como bytes crudos: la API decide la codificación (UTF-8 o la de Excel

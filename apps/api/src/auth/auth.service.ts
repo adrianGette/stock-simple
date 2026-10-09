@@ -8,6 +8,7 @@ import { AppError } from '../common/app-error'
 import type { Env } from '../config/env'
 import { PrismaService } from '../prisma/prisma.service'
 import type { AccessTokenPayload } from './auth.types'
+import { LoginAttempts } from './login-attempts'
 
 /** Si un token rotado se reutiliza dentro de esta ventana, se asume una carrera entre pestañas y no un robo. */
 const REUSE_GRACE_MS = 10_000
@@ -44,6 +45,7 @@ export class AuthService {
   // Hash señuelo: si el email no existe igual verificamos, así el tiempo de respuesta
   // no revela qué emails están registrados.
   private readonly dummyHash = argon2.hash(randomUUID())
+  private readonly attempts = new LoginAttempts()
 
   constructor(
     private readonly prisma: PrismaService,
@@ -52,11 +54,24 @@ export class AuthService {
   ) {}
 
   async login({ email, password }: LoginInput, userAgent?: string): Promise<IssuedSession> {
+    // En la demo las contraseñas son públicas: bloquear una cuenta solo serviría para dejar sin demo a todos.
+    const limitAttempts = !this.config.get('DEMO_MODE', { infer: true })
+    // Se cuenta igual exista o no el email, así el bloqueo tampoco revela qué cuentas hay.
+    if (limitAttempts && this.attempts.isLocked(email)) {
+      throw new AppError(
+        HttpStatus.TOO_MANY_REQUESTS,
+        'TOO_MANY_REQUESTS',
+        'Demasiados intentos fallidos con esta cuenta. Esperá 15 minutos y volvé a probar.',
+      )
+    }
+
     const user = await this.prisma.user.findUnique({ where: { email }, select: { ...userWithBusiness, passwordHash: true } })
     const valid = await argon2.verify(user?.passwordHash ?? (await this.dummyHash), password)
     if (!user || !valid || !user.active) {
+      if (limitAttempts) this.attempts.recordFailure(email)
       throw new AppError(HttpStatus.UNAUTHORIZED, 'INVALID_CREDENTIALS', 'Email o contraseña incorrectos')
     }
+    this.attempts.recordSuccess(email)
     await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
     return this.issueSession(user, randomUUID(), userAgent)
   }

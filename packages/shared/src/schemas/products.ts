@@ -41,6 +41,12 @@ export type UpdateProductInput = z.infer<typeof updateProductSchema>
 export const PRODUCT_SORTS = ['name', 'category', 'price', 'margin', 'stock'] as const
 export type ProductSort = (typeof PRODUCT_SORTS)[number]
 
+/** Búsqueda exacta por código de barras o SKU (lector del punto de venta). */
+export const productLookupQuerySchema = z.object({
+  code: z.string().trim().max(80).default(''),
+})
+export type ProductLookupQuery = z.infer<typeof productLookupQuerySchema>
+
 export const productQuerySchema = z.object({
   q: z.string().trim().max(80).optional(),
   categoryId: id.optional(),

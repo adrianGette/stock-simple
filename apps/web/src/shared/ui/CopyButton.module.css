@@ -1,0 +1,24 @@
+.button {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.button:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-ink);
+}
+
+.button[data-copied] {
+  color: var(--color-success);
+}

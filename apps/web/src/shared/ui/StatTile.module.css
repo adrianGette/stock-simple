@@ -16,10 +16,11 @@
 }
 
 .value {
-  font-size: var(--text-xl);
+  /* Igual que la cifra principal: se achica con la tarjeta (cqi) en lugar de partir "$ 54.900,0 / 0". */
+  font-size: clamp(1rem, 14cqi, var(--text-xl));
   font-weight: 700;
   letter-spacing: -0.03em;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .hero .value {

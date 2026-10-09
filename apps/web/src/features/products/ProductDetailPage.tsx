@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router'
 import { formatDateTime, formatMoney, formatPercent } from '../../lib/format'
 import { Badge } from '../../shared/ui/Badge'
 import { Button } from '../../shared/ui/Button'
+import { CopyButton } from '../../shared/ui/CopyButton'
 import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
 import { Icon } from '../../shared/ui/Icon'
 import { Card, Page, PageHeader } from '../../shared/ui/Layout'
@@ -48,14 +49,60 @@ export function ProductDetailPage() {
           </Link>
         }
         title={p.name}
-        subtitle={
-          <span className={styles.meta}>
-            <span className="mono">{p.sku}</span>
-            {p.barcode && <span className="mono">EAN {p.barcode}</span>}
-            <span>{p.category?.name ?? 'Sin categoría'}</span>
-            {!p.active && <Badge>Dado de baja</Badge>}
-            <StockBadge stock={p.stock} minStock={p.minStock} />
-          </span>
+        meta={
+          // Cada dato con su nombre: quien recién empieza no tiene por qué saber qué es "ACC-08" o un número de 13 cifras.
+          <dl className={styles.facts}>
+            <div className={styles.fact}>
+              <dt>
+                <Icon name="tag" size={14} /> SKU
+              </dt>
+              <dd>
+                <span className="mono">{p.sku}</span>
+                <CopyButton value={p.sku} label="SKU" />
+              </dd>
+            </div>
+            <div className={styles.fact}>
+              <dt>
+                <Icon name="scan" size={14} /> Código de barras
+              </dt>
+              <dd>
+                {p.barcode ? (
+                  <>
+                    <span className="mono">{p.barcode}</span>
+                    <CopyButton value={p.barcode} label="código de barras" />
+                  </>
+                ) : (
+                  <span className={styles.factEmpty}>Sin cargar</span>
+                )}
+              </dd>
+            </div>
+            <div className={styles.fact}>
+              <dt>
+                <Icon name="layers" size={14} /> Categoría
+              </dt>
+              <dd>
+                {p.category ? (
+                  <Link to={`/productos?categoria=${p.category.id}`} className={styles.factLink} title={`Ver los productos de ${p.category.name}`}>
+                    {p.category.name}
+                  </Link>
+                ) : (
+                  <span className={styles.factEmpty}>Sin categoría</span>
+                )}
+              </dd>
+            </div>
+            <div className={styles.fact}>
+              <dt>
+                <Icon name="info" size={14} /> Estado
+              </dt>
+              <dd>
+                {p.active ? (
+                  <StockBadge stock={p.stock} minStock={p.minStock} verbose />
+                ) : (
+                  <Badge>Dado de baja</Badge>
+                )}
+              </dd>
+            </div>
+          </dl>
         }
         actions={
           <>
