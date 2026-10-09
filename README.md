@@ -66,7 +66,7 @@ Las tiendas chicas de ropa y skate llevan el stock en un cuaderno o en Excel. No
 - **Reportes:** ventas por día, ganancia bruta, ticket promedio, ventas por categoría y por medio de pago, y ranking de productos. Cada uno se descarga en CSV.
 - **Equipo:** alta de usuarios, roles y desactivación (que cierra sus sesiones al instante). Cada usuario puede subir su foto de perfil o volver a sus iniciales.
 - **Buscador global:** <kbd>Ctrl</kbd> + <kbd>K</kbd> (<kbd>⌘</kbd> + <kbd>K</kbd> en Mac) busca productos y pantallas desde cualquier lugar.
-- **Diseño moderno y limpio:** tipografía Geist, grises *slate*, bordes finos, sombras suaves y esquinas redondeadas. El acento índigo, con un degradado índigo → violeta en las acciones principales y los títulos destacados, marca solo los puntos de interacción.
+- **Diseño moderno y limpio:** tipografía Geist, grises *slate*, bordes finos, sombras suaves y esquinas redondeadas. El acento, con un degradado en las acciones principales y los títulos destacados, marca solo los puntos de interacción. Cada persona elige su paleta desde el menú de usuario (Índigo, Océano o Grafito), además del modo claro u oscuro.
 - Modo claro y oscuro, diseño responsive y accesible: contraste AA, navegación por teclado, gráficos con vista de tabla y estados que nunca dependen solo del color.
 
 ### Datos de la demo

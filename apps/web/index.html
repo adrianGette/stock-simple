@@ -8,13 +8,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Stock Simple</title>
     <script>
-      // Aplica el tema elegido antes del primer pintado para evitar un parpadeo.
+      // Aplica el tema y la paleta elegidos antes del primer pintado para evitar un parpadeo.
       try {
         const scheme = localStorage.getItem('color-scheme')
         if (scheme === 'light' || scheme === 'dark') {
           document.querySelector('meta[name="color-scheme"]').content = scheme
           document.documentElement.dataset.theme = scheme
         }
+        const palette = localStorage.getItem('color-palette')
+        if (palette === 'ocean' || palette === 'graphite') document.documentElement.dataset.palette = palette
       } catch {}
     </script>
   </head>

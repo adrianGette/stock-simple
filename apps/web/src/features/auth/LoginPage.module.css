@@ -25,9 +25,9 @@
   width: 90%;
   height: 120%;
   background:
-    radial-gradient(closest-side, rgb(99 102 241 / 0.3), transparent),
-    radial-gradient(closest-side at 75% 60%, rgb(236 72 153 / 0.2), transparent),
-    radial-gradient(closest-side at 30% 85%, rgb(56 189 248 / 0.22), transparent);
+    radial-gradient(closest-side, rgb(var(--glow-1) / 0.3), transparent),
+    radial-gradient(closest-side at 75% 60%, rgb(var(--glow-2) / 0.2), transparent),
+    radial-gradient(closest-side at 30% 85%, rgb(var(--glow-3) / 0.22), transparent);
   filter: blur(48px);
   pointer-events: none;
 }
@@ -48,8 +48,8 @@
   height: 2.25rem;
   border-radius: var(--radius-md);
   background: var(--gradient-accent);
-  color: #ffffff;
-  box-shadow: 0 6px 16px -6px rgb(79 70 229 / 0.6);
+  color: var(--color-accent-ink);
+  box-shadow: 0 6px 16px -6px rgb(var(--accent-glow) / 0.6);
 }
 
 .pitch {
@@ -64,21 +64,12 @@
   padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
   border: var(--stroke) solid var(--color-border);
   border-radius: var(--radius-full);
-  background: rgb(255 255 255 / 0.6);
+  /* Vidrio: la superficie de la paleta (blanca en el claro) con transparencia. */
+  background: color-mix(in srgb, var(--color-surface) 60%, transparent);
   backdrop-filter: blur(8px);
   color: var(--color-ink-2);
   font-size: var(--text-sm);
   font-weight: 500;
-}
-
-:root[data-theme='dark'] .eyebrow {
-  background: rgb(17 24 39 / 0.6);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .eyebrow {
-    background: rgb(17 24 39 / 0.6);
-  }
 }
 
 .eyebrowTag {
@@ -120,22 +111,12 @@
   padding: var(--space-5);
   border: var(--stroke) solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: rgb(255 255 255 / 0.65);
+  background: color-mix(in srgb, var(--color-surface) 65%, transparent);
   backdrop-filter: blur(16px);
   box-shadow: var(--shadow-md);
   list-style: none;
   color: var(--color-ink-2);
   font-size: var(--text-sm);
-}
-
-:root[data-theme='dark'] .features {
-  background: rgb(17 24 39 / 0.65);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .features {
-    background: rgb(17 24 39 / 0.65);
-  }
 }
 
 .features li {
