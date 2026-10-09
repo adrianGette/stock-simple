@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { cents, id, pagination } from './common'
+import { SORT_DIRECTIONS, cents, id, pagination } from './common'
 
 const productFields = {
   name: z.string().trim().min(2, 'Mínimo 2 caracteres').max(120, 'Máximo 120 caracteres'),
@@ -40,9 +40,6 @@ export type UpdateProductInput = z.infer<typeof updateProductSchema>
 /** Columnas de la tabla de productos por las que se puede ordenar. `margin` requiere ver costos. */
 export const PRODUCT_SORTS = ['name', 'category', 'price', 'margin', 'stock'] as const
 export type ProductSort = (typeof PRODUCT_SORTS)[number]
-
-export const SORT_DIRECTIONS = ['asc', 'desc'] as const
-export type SortDirection = (typeof SORT_DIRECTIONS)[number]
 
 export const productQuerySchema = z.object({
   q: z.string().trim().max(80).optional(),

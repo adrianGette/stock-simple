@@ -143,15 +143,3 @@
 .inlineForm > :first-child {
   flex: 1;
 }
-
-/* El selector de orden solo aparece en celular: en pantallas anchas se ordena desde los encabezados. */
-.sortSelect {
-  display: none;
-  width: auto;
-}
-
-@media (max-width: 720px) {
-  .sortSelect {
-    display: block;
-  }
-}

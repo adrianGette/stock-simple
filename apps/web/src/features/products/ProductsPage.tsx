@@ -1,9 +1,10 @@
 import { PRODUCT_SORTS, type ProductSort, type SortDirection, marginPercent } from '@stock/shared'
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { formatMoney, formatPercent } from '../../lib/format'
 import { useDebouncedValue } from '../../shared/hooks/useDebouncedValue'
 import { useDownload } from '../../shared/hooks/useDownload'
+import { useQueryParams } from '../../shared/hooks/useQueryParams'
 import { Button } from '../../shared/ui/Button'
 import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
 import { SearchInput, Select } from '../../shared/ui/Field'
@@ -11,6 +12,7 @@ import { Card, Page, PageHeader, Toolbar, layoutStyles } from '../../shared/ui/L
 import { Pagination } from '../../shared/ui/Pagination'
 import { SegmentedControl } from '../../shared/ui/SegmentedControl'
 import { SortableHeader } from '../../shared/ui/SortableHeader'
+import { type SortOption, SortSelect } from '../../shared/ui/SortSelect'
 import table from '../../shared/ui/table.module.css'
 import { useCurrentUser } from '../auth/AuthProvider'
 import { CategoriesDialog } from './CategoriesDialog'
@@ -26,7 +28,7 @@ const STOCK_FILTERS = [
 ] as const
 
 /** Opciones del selector de orden en celular, donde la tabla se vuelve tarjetas y no hay encabezados. */
-const SORT_OPTIONS: { sort: ProductSort; dir: SortDirection; label: string }[] = [
+const SORT_OPTIONS: SortOption<ProductSort>[] = [
   { sort: 'name', dir: 'asc', label: 'Nombre (A a Z)' },
   { sort: 'name', dir: 'desc', label: 'Nombre (Z a A)' },
   { sort: 'category', dir: 'asc', label: 'Categoría (A a Z)' },
@@ -49,8 +51,7 @@ export function ProductsPage() {
   const [creating, setCreating] = useState(false)
   const [managingCategories, setManagingCategories] = useState(false)
 
-  // Los filtros viven en la URL: se pueden compartir, recargar y volver atrás sin perderlos.
-  const [params, setParams] = useSearchParams()
+  const [params, update] = useQueryParams()
   const [search, setSearch] = useState(params.get('q') ?? '')
   const q = useDebouncedValue(search.trim(), 300)
   const stock = (params.get('stock') ?? 'all') as ProductFilters['stock'] & string
@@ -60,20 +61,6 @@ export function ProductsPage() {
   const sortParam = params.get('orden')
   const sort: ProductSort = isProductSort(sortParam) && (sortParam !== 'margin' || canSeeCost) ? sortParam : 'name'
   const dir: SortDirection = params.get('dir') === 'desc' ? 'desc' : 'asc'
-
-  const update = (changes: Record<string, string | null>) =>
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        for (const [key, value] of Object.entries(changes)) {
-          if (value) next.set(key, value)
-          else next.delete(key)
-        }
-        if (!('pagina' in changes)) next.delete('pagina')
-        return next
-      },
-      { replace: true },
-    )
 
   // Los valores por defecto (nombre, ascendente) no se escriben en la URL, para que quede corta.
   const changeSort = (nextSort: ProductSort, nextDir: SortDirection) =>
@@ -144,21 +131,7 @@ export function ProductsPage() {
           options={STOCK_FILTERS}
           onChange={(value) => update({ stock: value === 'all' ? null : value })}
         />
-        <Select
-          aria-label="Ordenar por"
-          className={styles.sortSelect}
-          value={`${sort}:${dir}`}
-          onChange={(event) => {
-            const [nextSort, nextDir] = event.target.value.split(':') as [ProductSort, SortDirection]
-            changeSort(nextSort, nextDir)
-          }}
-        >
-          {SORT_OPTIONS.filter((option) => option.sort !== 'margin' || canSeeCost).map((option) => (
-            <option key={`${option.sort}:${option.dir}`} value={`${option.sort}:${option.dir}`}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
+        <SortSelect options={SORT_OPTIONS.filter((option) => option.sort !== 'margin' || canSeeCost)} {...sortProps} />
       </Toolbar>
 
       <Card flush>

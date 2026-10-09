@@ -4,7 +4,9 @@ import {
   type Paginated,
   type SaleDto,
   type SaleQuery,
+  type SaleSort,
   type SaleSummaryDto,
+  type SortDirection,
   type VoidSaleInput,
   can,
 } from '@stock/shared'
@@ -14,6 +16,27 @@ import { localDayRange } from '../common/dates'
 import { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { saleDetailInclude, saleSummaryInclude, toSaleDto, toSaleSummaryDto } from './sale.mapper'
+
+/**
+ * Orden del listado de ventas. El número es único por comercio, así que desempatar por número da
+ * un orden total y la paginación no repite ni saltea ventas.
+ */
+function saleOrderBy(sort: SaleSort, dir: SortDirection): Prisma.SaleOrderByWithRelationInput[] {
+  const tieBreak: Prisma.SaleOrderByWithRelationInput = { number: 'desc' }
+  switch (sort) {
+    case 'number':
+      return [{ number: dir }]
+    case 'date':
+      return [{ createdAt: dir }, tieBreak]
+    case 'seller':
+      return [{ user: { name: dir } }, tieBreak]
+    case 'items':
+      // Cantidad de renglones de la venta (lo que muestra la columna "Productos").
+      return [{ items: { _count: dir } }, tieBreak]
+    case 'total':
+      return [{ totalCents: dir }, tieBreak]
+  }
+}
 
 interface ReservedProduct {
   id: string
@@ -116,6 +139,7 @@ export class SalesService {
     const where: Prisma.SaleWhereInput = {
       businessId: user.businessId,
       status: query.status === 'ALL' ? undefined : query.status,
+      paymentMethod: query.paymentMethod,
       // Sin permiso para ver todas, cada cajero ve solo sus ventas.
       userId: can(user.role, 'sales:read-all') ? query.userId : user.id,
       createdAt: query.from || query.to ? localDayRange(query.from ?? '2000-01-01', query.to ?? '2100-01-01', user.timezone) : undefined,
@@ -125,7 +149,7 @@ export class SalesService {
       this.prisma.sale.findMany({
         where,
         include: saleSummaryInclude,
-        orderBy: { number: 'desc' },
+        orderBy: saleOrderBy(query.sort, query.dir),
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
       }),
