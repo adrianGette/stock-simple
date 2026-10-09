@@ -34,14 +34,14 @@
 /* El número principal del tablero, sobre el degradado de marca. */
 .hero {
   background: var(--gradient-accent);
-  color: #ffffff;
+  color: var(--color-accent-ink);
   border-color: transparent;
-  box-shadow: 0 12px 32px -12px rgb(79 70 229 / 0.6);
+  box-shadow: 0 12px 32px -12px rgb(var(--accent-glow) / 0.6);
 }
 
 .hero .label,
 .hero .hint {
-  color: rgb(255 255 255 / 0.85);
+  color: color-mix(in srgb, var(--color-accent-ink) 85%, transparent);
 }
 
 .meta {
@@ -75,8 +75,8 @@
 }
 
 .hero .delta {
-  background: rgb(255 255 255 / 0.18);
-  color: #ffffff;
+  background: color-mix(in srgb, var(--color-accent-ink) 18%, transparent);
+  color: var(--color-accent-ink);
 }
 
 .hint {
@@ -90,5 +90,5 @@
 }
 
 .hero .trend {
-  color: #ffffff;
+  color: var(--color-accent-ink);
 }

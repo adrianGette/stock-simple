@@ -16,7 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:17-alpine
+        # Imagen oficial desde Amazon ECR Public: Docker Hub limita las descargas anónimas y los
+        # runners de GitHub comparten IPs, así que el CI fallaba antes de correr un solo test.
+        image: public.ecr.aws/docker/library/postgres:17-alpine
         env:
           POSTGRES_USER: stock
           POSTGRES_PASSWORD: stock

@@ -1,0 +1,163 @@
+/*
+ * Paletas alternativas. Índigo (la de tokens.css) es la de siempre; estas redefinen los tokens del
+ * acento y, en modo oscuro, también las superficies (fondo, tarjetas, bordes) con un tinte propio:
+ * azul petróleo en Océano y gris neutro en Grafito. Los estados y el texto principal no cambian.
+ * Se activan con data-palette en <html> (lo aplica el script de index.html antes de pintar).
+ * Ninguna usa verde, ámbar ni rojo: esos colores ya significan "disponible", "stock bajo" y "error".
+ *
+ * Cada paleta tiene tres bloques, igual que los temas: claro, oscuro del sistema y oscuro fijado.
+ */
+
+/* ── Océano: azul profundo → cian ─────────────────────────────────────────── */
+:root[data-palette='ocean'] {
+  --color-accent: #0369a1;
+  --color-accent-hover: #075985;
+  --color-accent-vivid: #0284c7;
+  --color-accent-text: #075985;
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: #e0f2fe;
+  --color-accent-soft-ink: #075985;
+  --gradient-accent: linear-gradient(135deg, #0369a1, #0891b2);
+  --gradient-text: linear-gradient(90deg, #0369a1, #0891b2 60%, #06b6d4);
+  --color-chart: #bae6fd;
+  --color-chart-active: #0369a1;
+  --color-chart-active-2: #0891b2;
+  --accent-glow: 3 105 161;
+  --glow-1: 2 132 199;
+  --glow-2: 6 182 212;
+  --glow-3: 99 102 241;
+  --focus-ring: 0 0 0 3px rgb(14 165 233 / 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='ocean']:not([data-theme='light']) {
+    --color-page: #04121c;
+    --color-surface: #0a1b28;
+    --color-surface-2: #0f2536;
+    --color-surface-hover: #153045;
+    --color-border: #13293a;
+    --color-border-strong: #1f4057;
+    --color-frame: #13293a;
+    --color-grid: #0e2131;
+    --backdrop: rgb(2 10 18 / 0.72);
+    --color-accent: #0369a1;
+    --color-accent-hover: #0284c7;
+    --color-accent-vivid: #38bdf8;
+    --color-accent-text: #7dd3fc;
+    --color-accent-ink: #ffffff;
+    --color-accent-soft: #082f49;
+    --color-accent-soft-ink: #bae6fd;
+    --gradient-accent: linear-gradient(135deg, #0369a1, #0891b2);
+    --gradient-text: linear-gradient(90deg, #38bdf8, #22d3ee 60%, #a5f3fc);
+    --color-chart: #075985;
+    --color-chart-active: #38bdf8;
+    --color-chart-active-2: #22d3ee;
+    --accent-glow: 2 132 199;
+    --focus-ring: 0 0 0 3px rgb(56 189 248 / 0.4);
+  }
+}
+
+:root[data-palette='ocean'][data-theme='dark'] {
+  --color-page: #04121c;
+  --color-surface: #0a1b28;
+  --color-surface-2: #0f2536;
+  --color-surface-hover: #153045;
+  --color-border: #13293a;
+  --color-border-strong: #1f4057;
+  --color-frame: #13293a;
+  --color-grid: #0e2131;
+  --backdrop: rgb(2 10 18 / 0.72);
+  --color-accent: #0369a1;
+  --color-accent-hover: #0284c7;
+  --color-accent-vivid: #38bdf8;
+  --color-accent-text: #7dd3fc;
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: #082f49;
+  --color-accent-soft-ink: #bae6fd;
+  --gradient-accent: linear-gradient(135deg, #0369a1, #0891b2);
+  --gradient-text: linear-gradient(90deg, #38bdf8, #22d3ee 60%, #a5f3fc);
+  --color-chart: #075985;
+  --color-chart-active: #38bdf8;
+  --color-chart-active-2: #22d3ee;
+  --accent-glow: 2 132 199;
+  --focus-ring: 0 0 0 3px rgb(56 189 248 / 0.4);
+}
+
+/* ── Grafito: monocromo. Botón negro en el claro y blanco (con texto oscuro) en el oscuro ── */
+:root[data-palette='graphite'] {
+  --color-accent: #18181b;
+  --color-accent-hover: #3f3f46;
+  --color-accent-vivid: #52525b;
+  --color-accent-text: #27272a;
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: #f4f4f5;
+  --color-accent-soft-ink: #18181b;
+  --gradient-accent: linear-gradient(135deg, #18181b, #3f3f46);
+  --gradient-text: linear-gradient(90deg, #18181b, #52525b 60%, #71717a);
+  --color-chart: #d4d4d8;
+  --color-chart-active: #18181b;
+  --color-chart-active-2: #52525b;
+  --accent-glow: 24 24 27;
+  --glow-1: 113 113 122;
+  --glow-2: 161 161 170;
+  --glow-3: 82 82 91;
+  --focus-ring: 0 0 0 3px rgb(113 113 122 / 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='graphite']:not([data-theme='light']) {
+    --color-page: #09090b;
+    --color-surface: #131316;
+    --color-surface-2: #1c1c20;
+    --color-surface-hover: #26262b;
+    --color-ink-2: #d4d4d8;
+    --color-muted: #a1a1aa;
+    --color-border: #232327;
+    --color-border-strong: #3f3f46;
+    --color-frame: #232327;
+    --color-grid: #19191c;
+    --backdrop: rgb(0 0 0 / 0.72);
+    --color-accent: #fafafa;
+    --color-accent-hover: #e4e4e7;
+    --color-accent-vivid: #d4d4d8;
+    --color-accent-text: #e4e4e7;
+    --color-accent-ink: #18181b;
+    --color-accent-soft: #27272a;
+    --color-accent-soft-ink: #f4f4f5;
+    --gradient-accent: linear-gradient(135deg, #fafafa, #d4d4d8);
+    --gradient-text: linear-gradient(90deg, #fafafa, #d4d4d8 60%, #a1a1aa);
+    --color-chart: #3f3f46;
+    --color-chart-active: #e4e4e7;
+    --color-chart-active-2: #a1a1aa;
+    --accent-glow: 0 0 0;
+    --focus-ring: 0 0 0 3px rgb(228 228 231 / 0.35);
+  }
+}
+
+:root[data-palette='graphite'][data-theme='dark'] {
+  --color-page: #09090b;
+  --color-surface: #131316;
+  --color-surface-2: #1c1c20;
+  --color-surface-hover: #26262b;
+  --color-ink-2: #d4d4d8;
+  --color-muted: #a1a1aa;
+  --color-border: #232327;
+  --color-border-strong: #3f3f46;
+  --color-frame: #232327;
+  --color-grid: #19191c;
+  --backdrop: rgb(0 0 0 / 0.72);
+  --color-accent: #fafafa;
+  --color-accent-hover: #e4e4e7;
+  --color-accent-vivid: #d4d4d8;
+  --color-accent-text: #e4e4e7;
+  --color-accent-ink: #18181b;
+  --color-accent-soft: #27272a;
+  --color-accent-soft-ink: #f4f4f5;
+  --gradient-accent: linear-gradient(135deg, #fafafa, #d4d4d8);
+  --gradient-text: linear-gradient(90deg, #fafafa, #d4d4d8 60%, #a1a1aa);
+  --color-chart: #3f3f46;
+  --color-chart-active: #e4e4e7;
+  --color-chart-active-2: #a1a1aa;
+  --accent-glow: 0 0 0;
+  --focus-ring: 0 0 0 3px rgb(228 228 231 / 0.35);
+}
