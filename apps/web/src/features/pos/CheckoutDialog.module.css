@@ -18,9 +18,9 @@
 }
 
 .totalValue {
-  font-size: var(--text-hero);
-  font-stretch: 72%;
-  font-weight: 850;
+  font-size: clamp(2.25rem, 8vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
   line-height: 1;
 }
 
@@ -46,9 +46,7 @@
   height: 3rem;
   border: var(--stroke) solid var(--color-border-strong);
   border-radius: var(--radius-md);
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 500;
   cursor: pointer;
   transition:
     border-color 100ms,
@@ -94,8 +92,8 @@
 
 .changeValue {
   font-size: var(--text-xl);
-  font-stretch: 75%;
-  font-weight: 850;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .missing {

@@ -56,7 +56,7 @@ Las tiendas chicas de ropa y skate llevan el stock en un cuaderno o en Excel. No
 - **Ventas:** historial por período, detalle con costo y ganancia (según el rol) y anulación con motivo que devuelve el stock.
 - **Reportes:** ventas por día, ganancia bruta, ticket promedio, ventas por categoría y por medio de pago, y ranking de productos.
 - **Equipo:** alta de usuarios, roles y desactivación (que cierra sus sesiones al instante).
-- **Identidad punk de póster impreso:** blanco y tinta negra, tipografía condensada, bordes duros y sombras tipo sticker. Un único acento naranja seguridad marca solo los puntos de interacción (acción principal, foco, selección e ítem activo).
+- **Diseño moderno y limpio:** tipografía Geist, grises *slate*, bordes finos, sombras suaves y esquinas redondeadas. El acento índigo, con un degradado índigo → violeta en las acciones principales y los títulos destacados, marca solo los puntos de interacción. Modo claro y oscuro.
 - Modo claro y oscuro, diseño responsive y accesible: contraste AA, navegación por teclado, gráficos con vista de tabla y estados que nunca dependen solo del color.
 
 ### Datos de la demo

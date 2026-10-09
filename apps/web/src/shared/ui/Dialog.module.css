@@ -2,7 +2,7 @@
   width: min(100% - 2rem, var(--dialog-width, 32rem));
   max-height: min(100dvh - 2rem, 48rem);
   padding: 0;
-  border: var(--stroke) solid var(--color-border-strong);
+  border: var(--stroke) solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   color: var(--color-ink);
@@ -50,9 +50,8 @@
 
 .title {
   font-size: var(--text-xl);
-  font-stretch: var(--display-stretch);
-  font-weight: var(--display-weight);
-  text-transform: uppercase;
+  font-weight: 650;
+  letter-spacing: -0.025em;
 }
 
 .description {
