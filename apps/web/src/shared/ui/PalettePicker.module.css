@@ -1,0 +1,72 @@
+.picker {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.option {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-2);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.option:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-ink);
+}
+
+/* El radio queda accesible (teclado y lectores de pantalla) pero invisible: se ve la muestra. */
+.input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.swatch {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  /* Anillo fino para que el grafito se vea sobre fondos oscuros. */
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12), 0 0 0 1px var(--color-border);
+  transition: box-shadow var(--duration-fast) ease;
+}
+
+.input:checked ~ .swatch {
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-ink);
+}
+
+.input:checked ~ .label {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.input:focus-visible ~ .swatch {
+  outline: 2px solid var(--color-accent-vivid);
+  outline-offset: 5px;
+}

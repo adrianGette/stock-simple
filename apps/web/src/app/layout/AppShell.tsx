@@ -7,6 +7,7 @@ import { Button } from '../../shared/ui/Button'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Dialog } from '../../shared/ui/Dialog'
 import { Icon } from '../../shared/ui/Icon'
+import { PalettePicker } from '../../shared/ui/PalettePicker'
 import { NAV_GROUPS, NAV_ITEMS, type NavItem } from '../navigation'
 import { ProfilePhotoDialog } from '../../features/users/ProfilePhotoDialog'
 import { CommandPalette } from './CommandPalette'
@@ -106,9 +107,12 @@ export function AppShell() {
             >
               <Icon name="camera" size={16} /> Foto de perfil
             </button>
+            <hr className={styles.menuDivider} />
             <button type="button" className={styles.menuItem} onClick={toggle}>
               <Icon name={scheme === 'dark' ? 'sun' : 'moon'} size={16} /> {themeLabel}
             </button>
+            <PalettePicker />
+            <hr className={styles.menuDivider} />
             <button type="button" className={styles.menuItem} onClick={logout}>
               <Icon name="logout" size={16} /> Cerrar sesión
             </button>
@@ -168,6 +172,9 @@ export function AppShell() {
               <Icon name="logout" /> Cerrar sesión
             </button>
           </nav>
+          <div className={styles.moreAppearance}>
+            <PalettePicker />
+          </div>
         </div>
       </Dialog>
     </div>

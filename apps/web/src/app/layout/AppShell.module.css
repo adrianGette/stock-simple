@@ -38,8 +38,8 @@
   height: 2rem;
   border-radius: var(--radius-md);
   background: var(--gradient-accent);
-  color: #ffffff;
-  box-shadow: 0 4px 12px -4px rgb(79 70 229 / 0.55);
+  color: var(--color-accent-ink);
+  box-shadow: 0 4px 12px -4px rgb(var(--accent-glow) / 0.55);
 }
 
 .brandText {
@@ -206,6 +206,19 @@
 .menuItem:hover {
   background: var(--color-surface-hover);
   color: var(--color-ink);
+}
+
+.menuDivider {
+  margin: var(--space-1) calc(-1 * var(--space-1));
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Paleta en la pantalla "Más" del celular (el modo claro/oscuro está en la barra de arriba). */
+.moreAppearance {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
 }
 
 /* Botón del buscador rápido, con el atajo de teclado a la vista. */
