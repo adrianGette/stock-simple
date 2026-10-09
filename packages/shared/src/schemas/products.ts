@@ -37,7 +37,12 @@ export const updateProductSchema = z
   .refine((v) => Object.keys(v).length > 0, 'No hay cambios para guardar')
 export type UpdateProductInput = z.infer<typeof updateProductSchema>
 
-export const PRODUCT_SORTS = ['name', 'stock', 'price', 'updated'] as const
+/** Columnas de la tabla de productos por las que se puede ordenar. `margin` requiere ver costos. */
+export const PRODUCT_SORTS = ['name', 'category', 'price', 'margin', 'stock'] as const
+export type ProductSort = (typeof PRODUCT_SORTS)[number]
+
+export const SORT_DIRECTIONS = ['asc', 'desc'] as const
+export type SortDirection = (typeof SORT_DIRECTIONS)[number]
 
 export const productQuerySchema = z.object({
   q: z.string().trim().max(80).optional(),
@@ -45,6 +50,7 @@ export const productQuerySchema = z.object({
   stock: z.enum(['all', 'low', 'out']).default('all'),
   status: z.enum(['active', 'inactive', 'all']).default('active'),
   sort: z.enum(PRODUCT_SORTS).default('name'),
+  dir: z.enum(SORT_DIRECTIONS).default('asc'),
   ...pagination,
 })
 export type ProductQuery = z.infer<typeof productQuerySchema>
@@ -53,7 +59,7 @@ export type ProductQuery = z.infer<typeof productQuerySchema>
  * Mismos filtros que la lista, sin paginación ni orden: se exporta todo lo que coincide, siempre
  * ordenado por nombre (un orden que no cambia con las ventas que ocurran durante la descarga).
  */
-export const productExportQuerySchema = productQuerySchema.omit({ sort: true, page: true, pageSize: true })
+export const productExportQuerySchema = productQuerySchema.omit({ sort: true, dir: true, page: true, pageSize: true })
 export type ProductExportQuery = z.infer<typeof productExportQuerySchema>
 
 export interface ProductDto {

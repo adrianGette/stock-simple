@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { INestApplication } from '@nestjs/common'
-import { PRODUCT_SORTS } from '@stock/shared'
+import { PRODUCT_SORTS, SORT_DIRECTIONS } from '@stock/shared'
 import request from 'supertest'
 import type { PrismaService } from '../src/prisma/prisma.service'
 import { type Fixture, auth, createFixture, createTestApp, resetDatabase } from './helpers'
@@ -35,8 +35,10 @@ describe('Paginación estable con empates', () => {
     return { ids, total }
   }
 
-  it.each(PRODUCT_SORTS)('el listado de productos ordenado por "%s" devuelve cada producto una sola vez', async (sort) => {
-    // Todos iguales en nombre, stock, precio y fecha: el orden depende solo del desempate.
+  const sortCases = PRODUCT_SORTS.flatMap((sort) => SORT_DIRECTIONS.map((dir) => [sort, dir] as const))
+
+  it.each(sortCases)('el listado de productos ordenado por "%s" (%s) devuelve cada producto una sola vez', async (sort, dir) => {
+    // Todos iguales en nombre, categoría, stock, precio y margen: el orden depende solo del desempate.
     await prisma.product.createMany({
       data: Array.from({ length: 150 }, (_, i) => ({
         businessId: shop.businessId,
@@ -49,7 +51,7 @@ describe('Paginación estable con empates', () => {
       })),
     })
 
-    const { ids, total } = await collectIds('/api/products', { sort, pageSize: 20 })
+    const { ids, total } = await collectIds('/api/products', { sort, dir, pageSize: 20 })
     expect(total).toBe(150)
     expect(ids).toHaveLength(150)
     expect(new Set(ids).size).toBe(150)
