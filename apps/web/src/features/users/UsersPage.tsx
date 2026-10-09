@@ -1,21 +1,47 @@
-import { ROLE_LABELS, type UserDto } from '@stock/shared'
-import { useState } from 'react'
+import { ROLE_LABELS, type SortDirection, type UserDto } from '@stock/shared'
+import { useMemo, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
 import { Badge } from '../../shared/ui/Badge'
 import { Button } from '../../shared/ui/Button'
 import { ErrorState, LoadingState } from '../../shared/ui/Feedback'
 import { Icon } from '../../shared/ui/Icon'
+import { useQueryParams } from '../../shared/hooks/useQueryParams'
 import { Card, Page, PageHeader } from '../../shared/ui/Layout'
+import { SortableHeader } from '../../shared/ui/SortableHeader'
+import { type SortOption, SortSelect } from '../../shared/ui/SortSelect'
 import table from '../../shared/ui/table.module.css'
 import { useCurrentUser } from '../auth/AuthProvider'
 import { UserFormDialog } from './UserFormDialog'
 import { useUsers } from './api'
+import { USER_SORTS, type UserSort, sortUsers } from './sort-users'
 import styles from './UsersPage.module.css'
+
+const SORT_OPTIONS: SortOption<UserSort>[] = [
+  { sort: 'status', dir: 'asc', label: 'Activos primero' },
+  { sort: 'name', dir: 'asc', label: 'Nombre (A a Z)' },
+  { sort: 'name', dir: 'desc', label: 'Nombre (Z a A)' },
+  { sort: 'role', dir: 'asc', label: 'Rol: de dueño/a a cajero/a' },
+  { sort: 'role', dir: 'desc', label: 'Rol: de cajero/a a dueño/a' },
+  { sort: 'lastLogin', dir: 'desc', label: 'Ingreso más reciente' },
+  { sort: 'lastLogin', dir: 'asc', label: 'Ingreso más antiguo' },
+]
 
 export function UsersPage() {
   const me = useCurrentUser()
   const users = useUsers()
   const [editing, setEditing] = useState<UserDto | 'new' | null>(null)
+
+  // Por defecto, activos primero y por nombre (el orden de siempre). En la URL solo va lo que difiere.
+  const [params, update] = useQueryParams()
+  const sort: UserSort = USER_SORTS.find((option) => option === params.get('orden')) ?? 'status'
+  const dir: SortDirection = params.get('dir') === 'desc' ? 'desc' : 'asc'
+  const sortProps = {
+    sort,
+    dir,
+    onSort: (nextSort: UserSort, nextDir: SortDirection) =>
+      update({ orden: nextSort === 'status' ? null : nextSort, dir: nextDir === 'asc' ? null : nextDir }),
+  }
+  const sorted = useMemo(() => (users.data ? sortUsers(users.data, sort, dir) : []), [users.data, sort, dir])
 
   return (
     <Page>
@@ -40,6 +66,7 @@ export function UsersPage() {
           </span>
         </p>
       )}
+      <SortSelect options={SORT_OPTIONS} {...sortProps} />
       <Card flush>
         {users.isPending ? (
           <LoadingState />
@@ -49,17 +76,17 @@ export function UsersPage() {
           <table className={table.table}>
             <thead>
               <tr>
-                <th scope="col">Persona</th>
-                <th scope="col">Rol</th>
-                <th scope="col">Estado</th>
-                <th scope="col">Último ingreso</th>
+                <SortableHeader column="name" label="Persona" {...sortProps} />
+                <SortableHeader column="role" label="Rol" {...sortProps} />
+                <SortableHeader column="status" label="Estado" {...sortProps} />
+                <SortableHeader column="lastLogin" label="Último ingreso" {...sortProps} />
                 <th scope="col">
                   <span className="visually-hidden">Acciones</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {users.data.map((user) => (
+              {sorted.map((user) => (
                 <tr key={user.id} style={{ opacity: user.active ? 1 : 0.6 }}>
                   <td className={table.full}>
                     <span className={table.primaryCell}>
