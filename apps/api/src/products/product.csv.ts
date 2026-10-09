@@ -1,4 +1,4 @@
-import { type CsvColumn, PRODUCT_CSV_HEADERS as H, csvMoney } from '@stock/shared'
+import { COUNT_CSV_HEADERS as C, type CsvColumn, PRODUCT_CSV_HEADERS as H, csvMoney } from '@stock/shared'
 import type { ProductWithCategory } from './product.mapper'
 
 /** Columnas del CSV de productos. El costo solo se incluye si el rol puede verlo, igual que en la API. */
@@ -15,3 +15,12 @@ export function productCsvColumns(includeCost: boolean): CsvColumn<ProductWithCa
     { header: H.active, value: (p) => p.active },
   ]
 }
+
+/** Planilla de conteo: el stock del sistema al descargarla y una columna vacía para anotar lo contado. */
+export const COUNT_SHEET_COLUMNS: CsvColumn<ProductWithCategory>[] = [
+  { header: C.sku, value: (p) => p.sku },
+  { header: C.name, value: (p) => p.name },
+  { header: C.category, value: (p) => p.category?.name },
+  { header: C.systemStock, value: (p) => p.stock },
+  { header: C.counted, value: () => null },
+]

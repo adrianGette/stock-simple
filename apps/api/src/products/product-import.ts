@@ -57,7 +57,7 @@ export function decodeCsv(bytes: Uint8Array): string {
 }
 
 /** Entero no negativo, aceptando punto de miles ("1.000"). */
-function parseQuantity(value: string): number | null {
+export function parseQuantity(value: string): number | null {
   const cleaned = value.replace(/\./g, '')
   return /^\d+$/.test(cleaned) ? Number(cleaned) : null
 }

@@ -1,11 +1,4 @@
-import {
-  PRODUCT_CSV_HEADERS,
-  PRODUCT_IMPORT_MAX_BYTES,
-  type ProductImportChange,
-  type ProductImportPreviewDto,
-} from '@stock/shared'
-import { useRef, useState } from 'react'
-import { ApiError, errorMessage } from '../../lib/api-client'
+import { PRODUCT_CSV_HEADERS, type ProductImportChange, type ProductImportPreviewDto } from '@stock/shared'
 import { formatInteger, formatMoney } from '../../lib/format'
 import { Button } from '../../shared/ui/Button'
 import { Dialog } from '../../shared/ui/Dialog'
@@ -15,8 +8,8 @@ import { useToast } from '../../shared/ui/Toast'
 import table from '../../shared/ui/table.module.css'
 import { downloadImportTemplate, previewProductImport, useImportProducts } from './api'
 import styles from './products.module.css'
+import { useCsvPreview } from './useCsvPreview'
 
-const MAX_MB = Math.round(PRODUCT_IMPORT_MAX_BYTES / 1024 / 1024)
 const plural = (count: number, one: string, many: string) => `${formatInteger(count)} ${count === 1 ? one : many}`
 
 function formatValue(field: ProductImportChange['field'], value: ProductImportChange['before']): string {
@@ -42,54 +35,25 @@ function saveLabel({ toCreate, toUpdate }: ProductImportPreviewDto): string {
 export function ImportProductsDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const toast = useToast()
   const importing = useImportProducts()
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [file, setFile] = useState<File | null>(null)
-  const [preview, setPreview] = useState<ProductImportPreviewDto | null>(null)
-  const [checking, setChecking] = useState(false)
-  const [problem, setProblem] = useState<string | null>(null)
+  const { inputRef, file, preview, checking, problem, check, confirm: apply, reset } = useCsvPreview(previewProductImport)
 
   function close() {
-    setFile(null)
-    setPreview(null)
-    setProblem(null)
+    reset()
     importing.reset()
     onClose()
   }
 
-  async function check(selected: File | undefined) {
-    if (inputRef.current) inputRef.current.value = '' // permite volver a elegir el mismo archivo después de corregirlo
-    if (!selected) return
-    setFile(selected)
-    setPreview(null)
-    setProblem(null)
-    if (selected.size > PRODUCT_IMPORT_MAX_BYTES) return setProblem(`El archivo supera el máximo de ${MAX_MB} MB.`)
-    setChecking(true)
-    try {
-      setPreview(await previewProductImport(selected))
-    } catch (error) {
-      setProblem(errorMessage(error))
-    } finally {
-      setChecking(false)
-    }
-  }
-
   async function confirm() {
-    if (!file) return
-    try {
-      const result = await importing.mutateAsync(file)
-      const parts = [
-        result.created && `se crearon ${plural(result.created, 'producto', 'productos')}`,
-        result.updated && `se actualizaron ${plural(result.updated, 'producto', 'productos')}`,
-        result.newCategories.length && `${plural(result.newCategories.length, 'categoría nueva', 'categorías nuevas')}`,
-      ].filter(Boolean)
-      const message = parts.join(', ')
-      toast.success(message.charAt(0).toUpperCase() + message.slice(1))
-      close()
-    } catch (error) {
-      // Entre la vista previa y la confirmación algo cambió (p. ej. alguien creó un SKU): mostramos la revisión nueva.
-      if (error instanceof ApiError && error.code === 'IMPORT_INVALID') setPreview(error.details as ProductImportPreviewDto)
-      else setProblem(errorMessage(error))
-    }
+    const result = await apply(importing.mutateAsync)
+    if (!result) return
+    const parts = [
+      result.created && `se crearon ${plural(result.created, 'producto', 'productos')}`,
+      result.updated && `se actualizaron ${plural(result.updated, 'producto', 'productos')}`,
+      result.newCategories.length && `${plural(result.newCategories.length, 'categoría nueva', 'categorías nuevas')}`,
+    ].filter(Boolean)
+    const message = parts.join(', ')
+    toast.success(message.charAt(0).toUpperCase() + message.slice(1))
+    close()
   }
 
   const ready = preview !== null && preview.errorCount === 0 && preview.toCreate + preview.toUpdate > 0 && !checking
