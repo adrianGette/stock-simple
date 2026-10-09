@@ -1,11 +1,11 @@
-# syntax=docker/dockerfile:1
-#
 # Imagen de la web: compila React y la sirve con nginx. Se construye desde la raíz:
 #   docker build -f apps/web/Dockerfile .
 # La imagen final no lleva Node: solo nginx y los archivos estáticos.
+# Las imágenes base salen de Amazon ECR Public (copia de las oficiales de Docker Hub): los runners
+# de GitHub agotan seguido el límite de descargas anónimas de Docker Hub.
 
 # ---------- build: compila la web ----------
-FROM node:24-bookworm-slim AS build
+FROM public.ecr.aws/docker/library/node:24-bookworm-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/
@@ -21,7 +21,7 @@ RUN npm run build -w @stock/web
 
 # ---------- runtime: nginx sin privilegios de root ----------
 # La variante "unprivileged" corre como el usuario nginx y escucha en el puerto 8080.
-FROM nginxinc/nginx-unprivileged:stable-alpine AS runtime
+FROM public.ecr.aws/nginx/nginx-unprivileged:stable-alpine AS runtime
 COPY apps/web/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY apps/web/nginx/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html

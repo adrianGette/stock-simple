@@ -1,12 +1,12 @@
-# syntax=docker/dockerfile:1
-#
 # Imagen de la API (NestJS), en etapas. Se construye desde la raíz del monorepo:
 #   docker build -f apps/api/Dockerfile .
 # Solo la etapa "runtime" llega a la imagen final: sin TypeScript, sin tests y sin
 # herramientas de build.
+# Las imágenes base salen de Amazon ECR Public (copia de las oficiales de Docker Hub): los runners
+# de GitHub agotan seguido el límite de descargas anónimas de Docker Hub.
 
 # ---------- base: sistema común a todas las etapas ----------
-FROM node:24-bookworm-slim AS base
+FROM public.ecr.aws/docker/library/node:24-bookworm-slim AS base
 # OpenSSL lo necesita el motor de migraciones de Prisma.
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl \
