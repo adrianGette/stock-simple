@@ -13,9 +13,10 @@ import styles from './LoginPage.module.css'
 
 const FEATURES = [
   'Caja rápida, con lector de código de barras',
-  'Talles y stock al día, con historial de cada movimiento',
-  'Aumentos masivos con redondeo comercial',
-  'Reportes: qué rota, qué deja más y qué falta',
+  'Stock al día, con el historial de cada movimiento',
+  'Aumentos de precios masivos con redondeo comercial',
+  'Reportes de ventas y ganancia, exportables a Excel',
+  'Importación y conteo de inventario con planillas',
 ]
 
 export function LoginPage() {
@@ -55,16 +56,14 @@ export function LoginPage() {
           </span>
           Stock Simple
         </div>
-        <span className={styles.sticker} aria-hidden>
-          !!!
-        </span>
         <div className={styles.pitch}>
+          <span className={styles.eyebrow}>
+            <span className={styles.eyebrowTag}>Nuevo</span> Importá tu catálogo desde una planilla
+          </span>
           <h1>
-            Vendé más.
-            <br />
-            <span className={styles.highlight}>Contá menos.</span>
+            Vendé, controlá y <span className={styles.highlight}>decidí con datos.</span>
           </h1>
-          <p>Stock, caja y precios para tu tienda. Pensado para usar desde el mostrador, entre sesión y sesión.</p>
+          <p>Ventas, stock, precios y reportes en un solo lugar.</p>
         </div>
         <ul className={styles.features}>
           {FEATURES.map((feature) => (

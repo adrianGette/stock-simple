@@ -1,25 +1,26 @@
 /*
- * Tokens de diseño de Stock Simple · edición skate shop.
- * Estética punk/fanzine pero usable todo el día: papel, tinta negra, bordes duros, sombras
- * desplazadas tipo sticker y un único acento (naranja seguridad) solo donde se interactúa:
- * acción principal, foco, selección e ítem activo.
+ * Tokens de diseño de Stock Simple.
+ * Estilo moderno y limpio: grises "slate" levemente azulados, superficies claras con sombras suaves,
+ * bordes finos, esquinas redondeadas y un acento índigo (con degradado índigo → violeta en las
+ * acciones principales y los títulos destacados). El acento se reserva para lo interactivo.
  * El modo oscuro tiene sus propios valores y sigue al sistema salvo que el usuario fije un tema.
  */
 :root {
   color-scheme: light dark;
 
-  /* Tipografía: Archivo variable. Condensada y pesada en títulos (póster), normal en el texto. */
-  --font-sans: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Tipografía: Geist, grotesca geométrica. Títulos en peso alto con letras más juntas. */
+  --font-sans: 'Geist Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', monospace;
-  --display-stretch: 68%;
-  --display-weight: 820;
+  --display-stretch: 100%;
+  --display-weight: 700;
+  --display-tracking: -0.035em;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
   --text-md: 0.9375rem;
   --text-lg: 1.125rem;
   --text-xl: 1.5rem;
   --text-2xl: 2.25rem;
-  --text-hero: clamp(2.75rem, 6vw, 3.75rem);
+  --text-hero: clamp(2.5rem, 5.5vw, 3.75rem);
 
   /* Espaciado (escala de 4px) */
   --space-1: 0.25rem;
@@ -32,97 +33,103 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
 
-  /* Esquinas casi rectas: más recorte de fanzine que app de banco. */
-  --radius-sm: 2px;
-  --radius-md: 3px;
-  --radius-lg: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
   --radius-full: 999px;
 
-  --stroke: 2px;
+  --stroke: 1px;
   --sidebar-width: 236px;
   --content-max: 1200px;
   --control-height: 2.5rem;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Colores — modo claro: póster impreso, blanco puro y tinta */
-  --color-page: #ffffff;
+  /* Colores — modo claro */
+  --color-page: #f8fafc;
   --color-surface: #ffffff;
-  --color-surface-2: #f3f3f3;
-  --color-surface-hover: #ebebeb;
-  --color-ink: #0a0a0a;
-  --color-ink-2: #3d3d3d;
-  --color-muted: #666666;
-  --color-border: #e2e2e2;
-  --color-border-strong: #0a0a0a;
-  --color-frame: #0a0a0a;
-  --color-grid: #ececec;
+  --color-surface-2: #f1f5f9;
+  --color-surface-hover: #eef2f7;
+  --color-ink: #0f172a;
+  --color-ink-2: #334155;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-frame: #e2e8f0;
+  --color-grid: #eef2f7;
 
-  /* Acento naranja seguridad: energía DIY sin leerse como "peligro". Texto negro encima (5,6:1). */
-  --color-accent: #f25200;
-  --color-accent-hover: #ff6a1a;
-  --color-accent-vivid: #f25200;
-  --color-accent-text: #c2410c;
-  --color-accent-ink: #0a0a0a;
-  --color-accent-soft: #ffeadf;
-  --color-accent-soft-ink: #9a3412;
+  /* Acento índigo. Texto blanco encima (6,3:1). */
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-accent-vivid: #6366f1;
+  --color-accent-text: #4338ca;
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: #eef2ff;
+  --color-accent-soft-ink: #3730a3;
+  /* Degradados de marca: botón principal y palabras destacadas de los títulos. */
+  --gradient-accent: linear-gradient(135deg, #4f46e5, #7c3aed);
+  --gradient-text: linear-gradient(90deg, #4f46e5, #a855f7 60%, #ec4899);
 
-  /* Gráficos: marcas en tinta; la marca activa toma el acento. */
-  --color-chart: #2b2b2b;
-  --color-chart-active: #f25200;
+  /* Gráficos: barras índigo claro; la activa, en el acento. */
+  --color-chart: #c7d2fe;
+  --color-chart-active: #4f46e5;
 
-  /* Estados tipo sticker, separados del acento y siempre con ícono + texto */
-  --color-success: #137a3a;
-  --color-success-soft: #e2f4e8;
-  --color-warning: #0a0a0a;
-  --color-warning-soft: #ffe14d;
-  --color-danger: #c41d33;
-  --color-danger-soft: #fde4e7;
-  --color-danger-hover: #a3182b;
+  /* Estados, siempre con ícono + texto */
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-warning: #92400e;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fee2e2;
+  --color-danger-hover: #b91c1c;
 
-  /* Sombra dura desplazada (sticker / serigrafía), en lugar de sombras difusas */
-  --color-hard-shadow: #0a0a0a;
-  --shadow-hard: 3px 3px 0 var(--color-hard-shadow);
-  --shadow-hard-lg: 6px 6px 0 var(--color-hard-shadow);
-  --shadow-sm: none;
-  --shadow-md: var(--shadow-hard);
-  --shadow-lg: var(--shadow-hard-lg);
-  --backdrop: rgb(10 10 10 / 0.55);
-  --focus-ring: 0 0 0 3px rgb(242 82 0 / 0.3);
+  /* Sombras suaves y difusas. Las "duras" del estilo anterior quedan neutralizadas. */
+  --color-hard-shadow: transparent;
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.05);
+  --shadow-md: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -8px rgb(15 23 42 / 0.12);
+  --shadow-lg: 0 24px 48px -12px rgb(15 23 42 / 0.25);
+  --shadow-hard: var(--shadow-md);
+  --shadow-hard-lg: var(--shadow-lg);
+  --backdrop: rgb(15 23 42 / 0.45);
+  --focus-ring: 0 0 0 3px rgb(99 102 241 / 0.3);
 }
 
 /* Modo oscuro: sigue al sistema salvo que el usuario haya fijado el tema claro. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-page: #0a0a0a;
-    --color-surface: #151515;
-    --color-surface-2: #1e1e1e;
-    --color-surface-hover: #282828;
-    --color-ink: #f5f5f5;
-    --color-ink-2: #c8c8c8;
-    --color-muted: #9a9a9a;
-    --color-border: #2b2b2b;
-    --color-border-strong: #f5f5f5;
-    --color-frame: #3a3a3a;
-    --color-grid: #252525;
-    --color-accent: #ff6a1a;
-    --color-accent-hover: #ff8640;
-    --color-accent-vivid: #ff6a1a;
-    --color-accent-text: #ff8a4c;
-    --color-accent-ink: #0a0a0a;
-    --color-accent-soft: #2e170a;
-    --color-accent-soft-ink: #ffb088;
-    --color-chart: #d6d6d6;
-    --color-chart-active: #ff6a1a;
+    --color-page: #0b1020;
+    --color-surface: #111827;
+    --color-surface-2: #1a2234;
+    --color-surface-hover: #222c40;
+    --color-ink: #f1f5f9;
+    --color-ink-2: #cbd5e1;
+    --color-muted: #94a3b8;
+    --color-border: #1f2a3d;
+    --color-border-strong: #334155;
+    --color-frame: #1f2a3d;
+    --color-grid: #172033;
+    --color-accent: #4f46e5;
+    --color-accent-hover: #6366f1;
+    --color-accent-vivid: #818cf8;
+    --color-accent-text: #a5b4fc;
+    --color-accent-ink: #ffffff;
+    --color-accent-soft: #1e1b4b;
+    --color-accent-soft-ink: #c7d2fe;
+    --gradient-accent: linear-gradient(135deg, #4f46e5, #7c3aed);
+    --gradient-text: linear-gradient(90deg, #818cf8, #c084fc 60%, #f472b6);
+    --color-chart: #3730a3;
+    --color-chart-active: #818cf8;
     --color-success: #4ade80;
-    --color-success-soft: #10261a;
-    --color-warning: #0a0a0a;
-    --color-warning-soft: #ffe14d;
-    --color-danger: #ff5c70;
-    --color-danger-soft: #331418;
-    --color-danger-hover: #ff7a8b;
-    --color-hard-shadow: #f5f5f5;
-    --backdrop: rgb(0 0 0 / 0.7);
-    --focus-ring: 0 0 0 3px rgb(255 106 26 / 0.4);
+    --color-success-soft: #052e1a;
+    --color-warning: #fcd34d;
+    --color-warning-soft: #3a2a0a;
+    --color-danger: #f87171;
+    --color-danger-soft: #3b1219;
+    --color-danger-hover: #fca5a5;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 24px 48px -12px rgb(0 0 0 / 0.6);
+    --backdrop: rgb(2 6 23 / 0.7);
+    --focus-ring: 0 0 0 3px rgb(129 140 248 / 0.4);
   }
 }
 
@@ -132,34 +139,38 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --color-page: #0a0a0a;
-  --color-surface: #151515;
-  --color-surface-2: #1e1e1e;
-  --color-surface-hover: #282828;
-  --color-ink: #f5f5f5;
-  --color-ink-2: #c8c8c8;
-  --color-muted: #9a9a9a;
-  --color-border: #2b2b2b;
-  --color-border-strong: #f5f5f5;
-  --color-frame: #3a3a3a;
-  --color-grid: #252525;
-  --color-accent: #ff6a1a;
-  --color-accent-hover: #ff8640;
-  --color-accent-vivid: #ff6a1a;
-  --color-accent-text: #ff8a4c;
-  --color-accent-ink: #0a0a0a;
-  --color-accent-soft: #2e170a;
-  --color-accent-soft-ink: #ffb088;
-  --color-chart: #d6d6d6;
-  --color-chart-active: #ff6a1a;
+  --color-page: #0b1020;
+  --color-surface: #111827;
+  --color-surface-2: #1a2234;
+  --color-surface-hover: #222c40;
+  --color-ink: #f1f5f9;
+  --color-ink-2: #cbd5e1;
+  --color-muted: #94a3b8;
+  --color-border: #1f2a3d;
+  --color-border-strong: #334155;
+  --color-frame: #1f2a3d;
+  --color-grid: #172033;
+  --color-accent: #4f46e5;
+  --color-accent-hover: #6366f1;
+  --color-accent-vivid: #818cf8;
+  --color-accent-text: #a5b4fc;
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: #1e1b4b;
+  --color-accent-soft-ink: #c7d2fe;
+  --gradient-accent: linear-gradient(135deg, #4f46e5, #7c3aed);
+  --gradient-text: linear-gradient(90deg, #818cf8, #c084fc 60%, #f472b6);
+  --color-chart: #3730a3;
+  --color-chart-active: #818cf8;
   --color-success: #4ade80;
-  --color-success-soft: #10261a;
-  --color-warning: #0a0a0a;
-  --color-warning-soft: #ffe14d;
-  --color-danger: #ff5c70;
-  --color-danger-soft: #331418;
-  --color-danger-hover: #ff7a8b;
-  --color-hard-shadow: #f5f5f5;
-  --backdrop: rgb(0 0 0 / 0.7);
-  --focus-ring: 0 0 0 3px rgb(255 106 26 / 0.4);
+  --color-success-soft: #052e1a;
+  --color-warning: #fcd34d;
+  --color-warning-soft: #3a2a0a;
+  --color-danger: #f87171;
+  --color-danger-soft: #3b1219;
+  --color-danger-hover: #fca5a5;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 24px 48px -12px rgb(0 0 0 / 0.6);
+  --backdrop: rgb(2 6 23 / 0.7);
+  --focus-ring: 0 0 0 3px rgb(129 140 248 / 0.4);
 }

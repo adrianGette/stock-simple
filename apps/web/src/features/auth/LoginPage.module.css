@@ -6,29 +6,39 @@
 
 .brandPanel {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-10);
   padding: var(--space-10) clamp(var(--space-6), 5vw, var(--space-12));
-  background-color: #0a0a0a;
-  /* Trama de puntos tipo serigrafía, apenas visible. */
-  background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1.2px);
-  background-size: 14px 14px;
-  color: #f5f5f5;
+  background: var(--color-page);
   overflow: hidden;
-  border-right: var(--stroke) solid #0a0a0a;
+}
+
+/* Manchas de color difuminadas detrás del texto (índigo, rosa y celeste). */
+.brandPanel::before {
+  content: '';
+  position: absolute;
+  inset: -20% -30% auto auto;
+  z-index: -1;
+  width: 90%;
+  height: 120%;
+  background:
+    radial-gradient(closest-side, rgb(99 102 241 / 0.3), transparent),
+    radial-gradient(closest-side at 75% 60%, rgb(236 72 153 / 0.2), transparent),
+    radial-gradient(closest-side at 30% 85%, rgb(56 189 248 / 0.22), transparent);
+  filter: blur(48px);
+  pointer-events: none;
 }
 
 .logo {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  font-size: var(--text-xl);
-  font-stretch: var(--display-stretch);
-  font-weight: var(--display-weight);
-  text-transform: uppercase;
-  position: relative;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .logoMark {
@@ -36,83 +46,120 @@
   place-items: center;
   width: 2.25rem;
   height: 2.25rem;
-  border: var(--stroke) solid #f5f5f5;
-  border-radius: var(--radius-sm);
-  background: #ff6a1a;
-  color: #0a0a0a;
-  rotate: -6deg;
-  box-shadow: 3px 3px 0 #f5f5f5;
+  border-radius: var(--radius-md);
+  background: var(--gradient-accent);
+  color: #ffffff;
+  box-shadow: 0 6px 16px -6px rgb(79 70 229 / 0.6);
 }
 
 .pitch {
-  position: relative;
-  max-width: 34rem;
+  max-width: 36rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  border: var(--stroke) solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.6);
+  backdrop-filter: blur(8px);
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+:root[data-theme='dark'] .eyebrow {
+  background: rgb(17 24 39 / 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .eyebrow {
+    background: rgb(17 24 39 / 0.6);
+  }
+}
+
+.eyebrowTag {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-ink);
+  font-size: var(--text-xs);
+  font-weight: 600;
 }
 
 .pitch h1 {
-  font-size: clamp(3rem, 7vw, 5.5rem);
-  line-height: 0.9;
+  font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+  line-height: 1.02;
 }
 
-/* Palabra marcada como con fibrón: bloque naranja levemente torcido. */
+/* La parte final del título, con el degradado de marca. */
 .highlight {
-  display: inline-block;
-  margin-top: 0.08em;
-  padding: 0 0.12em;
-  background: #ff6a1a;
-  color: #0a0a0a;
-  rotate: -2deg;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .pitch p {
-  margin-top: var(--space-6);
-  max-width: 28rem;
-  color: #c8c8c8;
+  margin-top: var(--space-5);
+  max-width: 30rem;
+  color: var(--color-ink-2);
   font-size: var(--text-lg);
+  line-height: 1.6;
 }
 
-.sticker {
-  position: absolute;
-  top: var(--space-10);
-  right: clamp(var(--space-6), 5vw, var(--space-12));
-  padding: var(--space-2) var(--space-3);
-  border: var(--stroke) solid #0a0a0a;
-  background: #ffe14d;
-  color: #0a0a0a;
-  font-size: var(--text-xs);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  rotate: 8deg;
-  box-shadow: 3px 3px 0 #f5f5f5;
-}
-
+/* Funcionalidades en una tarjeta de vidrio esmerilado. */
 .features {
-  position: relative;
   display: grid;
   gap: var(--space-3);
+  max-width: 30rem;
   margin: 0;
-  padding: 0;
+  padding: var(--space-5);
+  border: var(--stroke) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgb(255 255 255 / 0.65);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-md);
   list-style: none;
-  color: #c8c8c8;
+  color: var(--color-ink-2);
   font-size: var(--text-sm);
+}
+
+:root[data-theme='dark'] .features {
+  background: rgb(17 24 39 / 0.65);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .features {
+    background: rgb(17 24 39 / 0.65);
+  }
 }
 
 .features li {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
   align-items: center;
 }
 
 .features svg {
-  color: #ff6a1a;
+  flex: none;
+  padding: 3px;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
 }
 
 .formPanel {
   display: grid;
   place-items: center;
   padding: var(--space-10) var(--space-6);
-  background: var(--color-page);
+  background: var(--color-surface);
+  border-left: var(--stroke) solid var(--color-border);
 }
 
 .form {
@@ -123,21 +170,19 @@
 
 .formTitle {
   font-size: var(--text-2xl);
-  font-stretch: var(--display-stretch);
   font-weight: var(--display-weight);
-  text-transform: uppercase;
+  letter-spacing: var(--display-tracking);
 }
 
 .formSubtitle {
   margin-top: var(--space-1);
-  color: var(--color-ink-2);
+  color: var(--color-muted);
 }
 
 .alert {
   display: flex;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: var(--stroke) solid currentColor;
   border-radius: var(--radius-md);
   background: var(--color-danger-soft);
   color: var(--color-danger);
@@ -149,11 +194,8 @@
   align-items: center;
   gap: var(--space-3);
   margin-top: var(--space-2);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--color-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 700;
 }
 
 .divider::before,
@@ -175,24 +217,19 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
-  border: var(--stroke) solid var(--color-border-strong);
+  border: var(--stroke) solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   text-align: left;
   cursor: pointer;
   transition:
-    box-shadow 90ms,
-    translate 90ms;
+    border-color 120ms,
+    box-shadow 120ms;
 }
 
 .demoButton:hover:not(:disabled) {
-  box-shadow: var(--shadow-hard);
-  translate: -1px -1px;
-}
-
-.demoButton:active:not(:disabled) {
-  box-shadow: none;
-  translate: 2px 2px;
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .demoButton:disabled {
@@ -205,20 +242,15 @@
   place-items: center;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: var(--radius-sm);
-  background: var(--color-accent);
-  color: var(--color-accent-ink);
-  border: var(--stroke) solid var(--color-border-strong);
-  font-stretch: 75%;
-  font-weight: 850;
-  font-weight: 650;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-ink);
+  font-weight: 600;
 }
 
 .demoName {
   display: block;
-  font-weight: 750;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-weight: 600;
   font-size: var(--text-sm);
 }
 
@@ -230,11 +262,13 @@
 
 .demoButton > svg {
   color: var(--color-muted);
-  transition: color 120ms, translate 120ms;
+  transition:
+    color 120ms,
+    translate 120ms;
 }
 
 .demoButton:hover:not(:disabled) > svg {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   translate: 2px 0;
 }
 
@@ -248,16 +282,16 @@
     gap: var(--space-6);
   }
 
-  .sticker {
-    top: var(--space-6);
-    right: var(--space-6);
-  }
-
   .features {
     display: none;
   }
 
   .pitch p {
     font-size: var(--text-md);
+  }
+
+  .formPanel {
+    border-left: 0;
+    border-top: var(--stroke) solid var(--color-border);
   }
 }

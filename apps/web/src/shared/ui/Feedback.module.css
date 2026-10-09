@@ -25,9 +25,8 @@
 
 .title {
   font-size: var(--text-lg);
-  font-stretch: var(--display-stretch);
-  font-weight: var(--display-weight);
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--color-ink);
 }
 
