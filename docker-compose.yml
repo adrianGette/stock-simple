@@ -8,7 +8,8 @@
 
 services:
   db:
-    image: postgres:17-alpine
+    # Imagen oficial desde Amazon ECR Public: sin el límite de descargas anónimas de Docker Hub.
+    image: public.ecr.aws/docker/library/postgres:17-alpine
     container_name: stock-simple-db
     environment:
       POSTGRES_USER: stock
