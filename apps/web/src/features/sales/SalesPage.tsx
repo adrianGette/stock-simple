@@ -157,7 +157,7 @@ export function SalesPage() {
                     {seesAll && (
                       <td data-label="Vendió">
                         <span className={table.person}>
-                          <Avatar name={sale.user.name} seed={sale.user.id} size="sm" />
+                          <Avatar name={sale.user.name} userId={sale.user.id} photoVersion={sale.user.photoVersion} size="sm" />
                           {sale.user.name}
                         </span>
                       </td>

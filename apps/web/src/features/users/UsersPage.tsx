@@ -91,7 +91,7 @@ export function UsersPage() {
                 <tr key={user.id} style={{ opacity: user.active ? 1 : 0.6 }}>
                   <td className={table.full}>
                     <span className={table.person}>
-                      <Avatar name={user.name} seed={user.id} />
+                      <Avatar name={user.name} userId={user.id} photoVersion={user.photoVersion} />
                       <span>
                         <span className={table.primaryCell}>
                           {user.name} {user.id === me.id && <Badge>Vos</Badge>}

@@ -29,3 +29,9 @@
   height: 3rem;
   font-size: var(--text-md);
 }
+
+.xl {
+  width: 6rem;
+  height: 6rem;
+  font-size: var(--text-2xl);
+}

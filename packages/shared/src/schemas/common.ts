@@ -30,4 +30,10 @@ export interface Paginated<T> {
 export interface UserRef {
   id: string
   name: string
+  /** Versión de la foto de perfil (cuándo cambió); null si no tiene foto. */
+  photoVersion: string | null
 }
+
+/** Foto de perfil: la web la recorta a un cuadrado de este lado y la sube como WebP. */
+export const PROFILE_PHOTO_SIZE = 256
+export const PROFILE_PHOTO_MAX_BYTES = 200 * 1024

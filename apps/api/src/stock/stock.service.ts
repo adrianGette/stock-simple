@@ -4,6 +4,7 @@ import type { RequestUser } from '../auth/auth.types'
 import { AppError } from '../common/app-error'
 import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { toUserRef, userRefSelect } from '../users/user-ref'
 
 @Injectable()
 export class StockService {
@@ -83,7 +84,7 @@ export class StockService {
     await this.assertProduct(user.businessId, productId)
     const rows = await this.prisma.priceChange.findMany({
       where: { productId, businessId: user.businessId },
-      include: { user: { select: { id: true, name: true } } },
+      include: { user: { select: userRefSelect } },
       orderBy: { createdAt: 'desc' },
       take: 50,
     })
@@ -94,7 +95,7 @@ export class StockService {
       oldCostCents: r.oldCostCents,
       newCostCents: r.newCostCents,
       reason: r.reason,
-      user: r.user,
+      user: toUserRef(r.user),
       createdAt: r.createdAt.toISOString(),
     }))
   }
@@ -117,7 +118,7 @@ export class StockService {
 }
 
 const movementInclude = {
-  user: { select: { id: true, name: true } },
+  user: { select: userRefSelect },
   sale: { select: { number: true } },
 } satisfies Prisma.StockMovementInclude
 
@@ -131,7 +132,7 @@ function toMovementDto(m: MovementRow): StockMovementDto {
     stockAfter: m.stockAfter,
     note: m.note,
     saleNumber: m.sale?.number ?? null,
-    user: m.user,
+    user: toUserRef(m.user),
     createdAt: m.createdAt.toISOString(),
   }
 }

@@ -1,14 +1,15 @@
 import type { SaleDto, SaleSummaryDto } from '@stock/shared'
 import type { Prisma } from '../generated/prisma/client'
+import { toUserRef, userRefSelect } from '../users/user-ref'
 
 export const saleSummaryInclude = {
-  user: { select: { id: true, name: true } },
+  user: { select: userRefSelect },
   _count: { select: { items: true } },
 } satisfies Prisma.SaleInclude
 
 export const saleDetailInclude = {
-  user: { select: { id: true, name: true } },
-  voidedBy: { select: { id: true, name: true } },
+  user: { select: userRefSelect },
+  voidedBy: { select: userRefSelect },
   items: { orderBy: { productName: 'asc' } },
   _count: { select: { items: true } },
 } satisfies Prisma.SaleInclude
@@ -24,7 +25,7 @@ export function toSaleSummaryDto(sale: SaleSummaryRow): SaleSummaryDto {
     paymentMethod: sale.paymentMethod,
     totalCents: sale.totalCents,
     itemCount: sale._count.items,
-    user: sale.user,
+    user: toUserRef(sale.user),
     createdAt: sale.createdAt.toISOString(),
   }
 }
@@ -44,6 +45,6 @@ export function toSaleDto(sale: SaleDetailRow, includeCost: boolean): SaleDto {
     })),
     voidedAt: sale.voidedAt?.toISOString() ?? null,
     voidReason: sale.voidReason,
-    voidedBy: sale.voidedBy,
+    voidedBy: sale.voidedBy ? toUserRef(sale.voidedBy) : null,
   }
 }

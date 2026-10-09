@@ -8,6 +8,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { Dialog } from '../../shared/ui/Dialog'
 import { Icon } from '../../shared/ui/Icon'
 import { NAV_GROUPS, NAV_ITEMS, type NavItem } from '../navigation'
+import { ProfilePhotoDialog } from '../../features/users/ProfilePhotoDialog'
 import { CommandPalette } from './CommandPalette'
 import styles from './AppShell.module.css'
 
@@ -24,6 +25,7 @@ export function AppShell() {
   const location = useLocation()
   const [moreOpen, setMoreOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [photoOpen, setPhotoOpen] = useState(false)
 
   // Ctrl + K (Cmd + K en Mac) abre el buscador rápido desde cualquier pantalla.
   useEffect(() => {
@@ -57,7 +59,7 @@ export function AppShell() {
 
   const userCard = (
     <>
-      <Avatar name={user.name} seed={user.id} />
+      <Avatar name={user.name} userId={user.id} photoVersion={user.photoVersion} />
       <span className={styles.userText}>
         <span className={styles.userName}>{user.name}</span>
         <span className={styles.userRole}>{ROLE_LABELS[user.role]}</span>
@@ -95,6 +97,15 @@ export function AppShell() {
             <Icon name="chevronsUpDown" size={16} />
           </button>
           <div id="user-menu" popover="auto" className={styles.userMenu}>
+            <button
+              type="button"
+              className={styles.menuItem}
+              popoverTarget="user-menu"
+              popoverTargetAction="hide"
+              onClick={() => setPhotoOpen(true)}
+            >
+              <Icon name="camera" size={16} /> Foto de perfil
+            </button>
             <button type="button" className={styles.menuItem} onClick={toggle}>
               <Icon name={scheme === 'dark' ? 'sun' : 'moon'} size={16} /> {themeLabel}
             </button>
@@ -135,12 +146,24 @@ export function AppShell() {
       </nav>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} items={items} />
+      <ProfilePhotoDialog open={photoOpen} onClose={() => setPhotoOpen(false)} />
 
       <Dialog open={moreOpen} onClose={() => setMoreOpen(false)} title="Más opciones">
         <div className={styles.moreList}>
           <div className={styles.user}>{userCard}</div>
           <nav className={styles.nav} aria-label="Secundaria" style={{ marginTop: 'var(--space-3)' }}>
             {secondary.map((item) => link(item, () => setMoreOpen(false)))}
+            <button
+              type="button"
+              className={styles.navLink}
+              style={{ border: 0, background: 'none', cursor: 'pointer' }}
+              onClick={() => {
+                setMoreOpen(false)
+                setPhotoOpen(true)
+              }}
+            >
+              <Icon name="camera" /> Foto de perfil
+            </button>
             <button type="button" className={styles.navLink} style={{ border: 0, background: 'none', cursor: 'pointer' }} onClick={logout}>
               <Icon name="logout" /> Cerrar sesión
             </button>

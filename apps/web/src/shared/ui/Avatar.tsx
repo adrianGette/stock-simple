@@ -1,3 +1,4 @@
+import { useUserPhoto } from '../hooks/useUserPhoto'
 import styles from './Avatar.module.css'
 
 // Degradados de los avatares: cada persona tiene siempre el mismo, así se la reconoce de un vistazo.
@@ -26,18 +27,23 @@ export function initials(name: string): string {
 
 interface AvatarProps {
   name: string
-  /** Para elegir el color; si no se pasa, se usa el nombre. */
-  seed?: string
-  /** Foto de perfil; sin foto se muestran las iniciales. */
+  /** Id de la persona: elige el color y, junto con `photoVersion`, trae su foto. */
+  userId?: string
+  /** Versión de la foto de perfil (null o ausente: sin foto, se muestran las iniciales). */
+  photoVersion?: string | null
+  /** Imagen a mostrar directamente (p. ej. la vista previa antes de subirla). */
   photoUrl?: string | null
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-export function Avatar({ name, seed, photoUrl, size = 'md' }: AvatarProps) {
+export function Avatar({ name, userId, photoVersion, photoUrl, size = 'md' }: AvatarProps) {
+  const stored = useUserPhoto(photoUrl ? undefined : userId, photoVersion)
+  const src = photoUrl ?? stored
   const className = [styles.avatar, styles[size]].join(' ')
-  if (photoUrl) return <img className={className} src={photoUrl} alt="" />
+  // Mientras la foto carga (o si falla) se ven las iniciales: nunca un hueco vacío.
+  if (src) return <img className={className} src={src} alt="" />
   return (
-    <span className={className} style={{ background: GRADIENTS[hash(seed ?? name) % GRADIENTS.length] }} aria-hidden>
+    <span className={className} style={{ background: GRADIENTS[hash(userId ?? name) % GRADIENTS.length] }} aria-hidden>
       {initials(name)}
     </span>
   )
