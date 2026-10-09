@@ -23,6 +23,12 @@ const envSchema = z.object({
   COOKIE_SECURE: z.enum(['true', 'false']).optional(),
   /** Cantidad de proxies delante de la API (Netlify + Render = 2), para que el rate limit vea la IP real. */
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
+  /**
+   * Secreto con el que Netlify firma los pedidos que reenvía (proxy firmado, ver netlify.toml).
+   * Si está definido, la API rechaza todo pedido sin una firma válida, salvo el health check y Swagger.
+   * Sin definir (desarrollo, docker compose) no se exige firma.
+   */
+  PROXY_SIGNATURE_SECRET: z.string().min(32, 'Usá un secreto de al menos 32 caracteres').optional(),
   /** Demo pública con cuentas compartidas: impide crear o modificar usuarios. */
   DEMO_MODE: z
     .enum(['true', 'false'])

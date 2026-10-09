@@ -29,7 +29,11 @@ jobs:
             echo "::error::Falta el secreto DEMO_DATABASE_URL (Settings → Secrets and variables → Actions)."
             exit 1
           fi
+      # Siempre lo publicado: con la rama por defecto (main) se aplicarían en producción migraciones que
+      # todavía no salieron en un release, y la API desplegada podría no entender el esquema nuevo.
       - uses: actions/checkout@v4
+        with:
+          ref: production
       - uses: actions/setup-node@v4
         with:
           node-version: 24

@@ -12,7 +12,12 @@ import { PermissionsGuard } from './permissions.guard'
   imports: [
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService<Env, true>) => ({ secret: config.get('JWT_ACCESS_SECRET', { infer: true }) }),
+      // El algoritmo queda fijo: un token firmado con otro (o sin firma) se rechaza aunque la librería lo admita.
+      useFactory: (config: ConfigService<Env, true>) => ({
+        secret: config.get('JWT_ACCESS_SECRET', { infer: true }),
+        signOptions: { algorithm: 'HS256' },
+        verifyOptions: { algorithms: ['HS256'] },
+      }),
     }),
   ],
   controllers: [AuthController],

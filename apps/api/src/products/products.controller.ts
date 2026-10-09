@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream'
-import { Body, Controller, Get, Header, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query, StreamableFile } from '@nestjs/common'
+import { Body, Controller, Get, Header, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, StreamableFile } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger'
 import {
   type CreateProduct,
@@ -10,10 +10,12 @@ import {
   type ProductExportQuery,
   type ProductImportPreviewDto,
   type ProductImportResultDto,
+  type ProductLookupQuery,
   type ProductQuery,
   type UpdateProductInput,
   createProductSchema,
   productExportQuerySchema,
+  productLookupQuerySchema,
   productQuerySchema,
   toLocalIsoDate,
   updateProductSchema,
@@ -47,7 +49,8 @@ export class ProductsController {
 
   @Get('lookup')
   @RequirePermissions('products:read')
-  lookup(@CurrentUser() user: RequestUser, @Query('code') code = ''): Promise<ProductDto> {
+  @ApiZodQuery(productLookupQuerySchema)
+  lookup(@CurrentUser() user: RequestUser, @ZodQuery(productLookupQuerySchema) { code }: ProductLookupQuery): Promise<ProductDto> {
     return this.products.lookup(user, code)
   }
 
