@@ -139,7 +139,7 @@ export function ProductsPage() {
         <Select
           aria-label="Categoría"
           value={categoryId}
-          onChange={(event) => update({ categoria: event.target.value || null })}
+          onValueChange={(value) => update({ categoria: value || null })}
           style={{ width: 'auto' }}
         >
           <option value="">Todas las categorías</option>

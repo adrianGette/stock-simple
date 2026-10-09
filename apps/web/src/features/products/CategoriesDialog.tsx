@@ -43,7 +43,7 @@ export function CategoriesDialog({ open, onClose }: { open: boolean; onClose: ()
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title="Categorías" description="Agrupan productos para filtrar, reportar y actualizar precios.">
+    <Dialog open={open} onClose={onClose} title="Categorías" description="Agrupan productos para filtrar, reportar y actualizar precios." icon="layers">
       <form onSubmit={create} className={styles.inlineForm} noValidate>
         <Field label="Nueva categoría" error={newError}>
           <Input value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="Ej. Longboards" />

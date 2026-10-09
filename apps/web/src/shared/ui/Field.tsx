@@ -2,7 +2,6 @@ import {
   type InputHTMLAttributes,
   type ReactNode,
   type Ref,
-  type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
   cloneElement,
   isValidElement,
@@ -86,9 +85,8 @@ export function SearchInput({ className, ...props }: WithRef<InputHTMLAttributes
   )
 }
 
-export function Select({ className, ...props }: WithRef<SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>) {
-  return <select className={[styles.control, className].filter(Boolean).join(' ')} {...props} />
-}
+/** El desplegable propio de la app (reemplaza al <select> nativo). */
+export { Select } from './Select'
 
 export function Textarea({ className, ...props }: WithRef<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>) {
   return <textarea className={[styles.control, className].filter(Boolean).join(' ')} {...props} />

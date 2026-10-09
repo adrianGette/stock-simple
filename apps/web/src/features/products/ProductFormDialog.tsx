@@ -39,7 +39,14 @@ interface ProductFormDialogProps {
 
 export function ProductFormDialog({ open, onClose, product, onSaved }: ProductFormDialogProps) {
   return (
-    <Dialog open={open} onClose={onClose} title={product ? 'Editar producto' : 'Nuevo producto'} wide>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={product ? 'Editar producto' : 'Nuevo producto'}
+      description={product ? `${product.sku} · los cambios de precio quedan en el historial` : 'Cargalo una vez y ya lo podés vender'}
+      icon={product ? 'edit' : 'box'}
+      wide
+    >
       {/* El formulario se monta al abrir: arranca siempre con los valores actuales. */}
       {open && <ProductForm product={product} onCancel={onClose} onSaved={onSaved} />}
     </Dialog>
@@ -95,14 +102,22 @@ function ProductForm({ product, onCancel, onSaved }: { product?: ProductDto; onC
         <Input className="mono" inputMode="numeric" {...form.register('barcode')} />
       </Field>
       <Field label="Categoría" optional error={errors.categoryId?.message}>
-        <Select {...form.register('categoryId')}>
-          <option value="">Sin categoría</option>
-          {categories.data?.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </Select>
+        {(controlProps) => (
+          <Controller
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => (
+              <Select {...controlProps} value={field.value ?? ''} onValueChange={field.onChange} onBlur={field.onBlur}>
+                <option value="">Sin categoría</option>
+                {categories.data?.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </Select>
+            )}
+          />
+        )}
       </Field>
       <Field label="Stock mínimo" hint="Te avisamos cuando quede esto o menos" error={errors.minStock?.message}>
         <Input type="number" min={0} inputMode="numeric" {...form.register('minStock', { valueAsNumber: true })} />

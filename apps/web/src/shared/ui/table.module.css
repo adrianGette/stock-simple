@@ -91,7 +91,7 @@
 
 @media (max-width: 720px) {
   .sortSelect {
-    display: block;
+    display: flex;
   }
 }
 
