@@ -34,14 +34,23 @@ describe('Importación de productos desde CSV', () => {
     const res = await send('import/preview', VALID).expect(200)
 
     // "remeras" y "Remeras" son la misma categoría nueva; "general" ya existe como "General".
-    expect(res.body).toEqual({ rows: 3, toCreate: 3, newCategories: ['Remeras'], errors: [], errorCount: 0 })
+    expect(res.body).toEqual({
+      rows: 3,
+      toCreate: 3,
+      toUpdate: 0,
+      unchanged: 0,
+      newCategories: ['Remeras'],
+      updates: [],
+      errors: [],
+      errorCount: 0,
+    })
     expect(await productCount()).toBe(0)
     expect(await prisma.category.count({ where: { businessId: shop.businessId } })).toBe(1)
   })
 
   it('importa los productos con sus categorías y registra el stock inicial en el libro', async () => {
     const res = await send('import', VALID).expect(201)
-    expect(res.body).toEqual({ created: 3, newCategories: ['Remeras'] })
+    expect(res.body).toEqual({ created: 3, updated: 0, newCategories: ['Remeras'] })
 
     const products = await prisma.product.findMany({
       where: { businessId: shop.businessId },
@@ -56,17 +65,13 @@ describe('Importación de productos desde CSV', () => {
     expect(products.map((p) => p.stockMovements.map((m) => [m.type, m.quantity]))).toEqual([[['INITIAL', 10]], [['INITIAL', 5]], []])
   })
 
-  it('con un SKU que ya existe, la vista previa lo marca y la importación no guarda nada', async () => {
-    await prisma.product.create({ data: { businessId: shop.businessId, sku: 'REM-02', name: 'Vieja', costCents: 1, priceCents: 1 } })
+  it('si una fila tiene errores no se guarda nada, ni lo que estaba bien', async () => {
+    const withError = csv('REM-01;;Remera negra;Remeras;20000;39900;5;2;', 'REM-02;;Remera blanca;Remeras;20000;abc;;;')
 
-    const preview = await send('import/preview', VALID).expect(200)
-    expect(preview.body.errors).toEqual([{ row: 3, message: 'SKU: ya existe un producto con el SKU REM-02.' }])
-    expect(preview.body.toCreate).toBe(2)
-
-    const res = await send('import', VALID).expect(422)
+    const res = await send('import', withError).expect(422)
     expect(res.body.code).toBe('IMPORT_INVALID')
-    expect(res.body.details.errorCount).toBe(1)
-    expect(await productCount()).toBe(1) // solo la que ya estaba: todo o nada
+    expect(res.body.details.errors).toEqual([{ row: 3, message: 'Precio: «abc» no es un monto válido.' }])
+    expect(await productCount()).toBe(0)
     expect(await prisma.category.count({ where: { businessId: shop.businessId, name: 'Remeras' } })).toBe(0)
   })
 

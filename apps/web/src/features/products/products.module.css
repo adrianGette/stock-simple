@@ -188,7 +188,31 @@
   color: var(--color-ink-2);
 }
 
-/* La lista de errores puede ser larga: se desplaza adentro y el diálogo no crece sin fin. */
+/* Sin nada para guardar: neutro, ni éxito ni error. */
+.importNeutral {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+}
+
+.importNeutral p {
+  margin: var(--space-1) 0 0;
+}
+
+.changeList {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* La lista de errores (o de cambios) puede ser larga: se desplaza adentro y el diálogo no crece sin fin. */
 .importErrors {
   max-height: 18rem;
   overflow-y: auto;

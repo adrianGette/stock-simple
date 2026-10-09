@@ -86,14 +86,35 @@ export interface ProductImportError {
   message: string
 }
 
-/** Resultado de revisar un archivo antes de importarlo. No guarda nada. */
+/** Un campo que cambia en un producto existente. Los montos van en centavos; vacío es null. */
+export interface ProductImportChange {
+  field: Exclude<ProductCsvField, 'sku' | 'stock'>
+  before: string | number | boolean | null
+  after: string | number | boolean | null
+}
+
+export interface ProductImportUpdate {
+  row: number
+  sku: string
+  name: string
+  changes: ProductImportChange[]
+}
+
+/**
+ * Resultado de revisar un archivo antes de importarlo. No guarda nada. Cada fila se identifica por
+ * SKU: si el producto existe se actualiza (salvo el stock, que se corrige con un conteo); si no, se crea.
+ */
 export interface ProductImportPreviewDto {
   /** Filas con datos (sin contar el encabezado). */
   rows: number
-  /** Productos que se crearían si no hubiera errores. */
   toCreate: number
+  toUpdate: number
+  /** Productos existentes cuya fila es idéntica a lo que ya hay: no se tocan. */
+  unchanged: number
   /** Categorías que no existen y se crearían. */
   newCategories: string[]
+  /** Detalle de las actualizaciones, hasta un máximo; `toUpdate` dice cuántas hay en total. */
+  updates: ProductImportUpdate[]
   /** Errores por fila, hasta un máximo; `errorCount` dice cuántos hay en total. */
   errors: ProductImportError[]
   errorCount: number
@@ -101,6 +122,7 @@ export interface ProductImportPreviewDto {
 
 export interface ProductImportResultDto {
   created: number
+  updated: number
   newCategories: string[]
 }
 
