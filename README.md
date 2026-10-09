@@ -1,9 +1,9 @@
 # Stock Simple
 
-**Stock, caja y precios para tiendas chicas.** Punto de venta rápido, stock por talle con historial de cada movimiento, aumentos masivos de precios con redondeo comercial y reportes de ventas y márgenes. Monorepo full stack con **React 19 + NestJS + PostgreSQL**.
+**Vendé, controlá y decidí con datos.** Ventas, stock, precios y reportes en un solo lugar para tiendas chicas: punto de venta rápido, stock por talle con historial de cada movimiento, importación y conteo de inventario con planillas, aumentos masivos con redondeo comercial y reportes exportables. Monorepo full stack con **React 19 + NestJS + PostgreSQL**.
 
 [![CI](https://github.com/adrianGette/stock-simple/actions/workflows/ci.yml/badge.svg)](https://github.com/adrianGette/stock-simple/actions/workflows/ci.yml)
-[![Demo en vivo](https://img.shields.io/badge/demo-en%20vivo-f25200)](https://stock-simple-adrian.netlify.app)
+[![Demo en vivo](https://img.shields.io/badge/demo-en%20vivo-4f46e5)](https://stock-simple-adrian.netlify.app)
 
 ### 👉 [Ver la demo en vivo](https://stock-simple-adrian.netlify.app)
 
@@ -25,8 +25,16 @@ Entrá con los botones de demo del login (contraseña `demo1234`). Cada rol ve u
     <td width="50%"><img src="docs/screenshots/cobro.jpg" alt="Cobro con cálculo de vuelto" /><p align="center"><b>Cobro</b>: medios de pago y cálculo de vuelto</p></td>
   </tr>
   <tr>
+    <td width="50%"><img src="docs/screenshots/productos.jpg" alt="Catálogo de productos ordenado por margen" /><p align="center"><b>Productos</b>: filtros, orden por cualquier columna y exportación</p></td>
+    <td width="50%"><img src="docs/screenshots/importar.jpg" alt="Importación de productos desde una planilla con vista previa" /><p align="center"><b>Importar</b>: vista previa de cada cambio antes de guardar</p></td>
+  </tr>
+  <tr>
     <td width="50%"><img src="docs/screenshots/precios.jpg" alt="Actualización masiva de precios con vista previa" /><p align="center"><b>Aumentos masivos</b>: vista previa con el margen antes y después</p></td>
-    <td width="50%"><img src="docs/screenshots/reportes.jpg" alt="Reportes de ventas" /><p align="center"><b>Reportes</b>: ventas por día, categoría y medio de pago</p></td>
+    <td width="50%"><img src="docs/screenshots/reportes.jpg" alt="Reportes de ventas" /><p align="center"><b>Reportes</b>: ventas por día, categoría y medio de pago, exportables a CSV</p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/login.jpg" alt="Pantalla de ingreso con cuentas de demo" /><p align="center"><b>Ingreso</b>: una cuenta de demo por rol</p></td>
+    <td width="50%"><img src="docs/screenshots/buscador.jpg" alt="Buscador global abierto con Ctrl+K" /><p align="center"><b>Buscador</b>: productos y pantallas con <kbd>Ctrl</kbd> + <kbd>K</kbd></p></td>
   </tr>
   <tr>
     <td width="50%"><img src="docs/screenshots/inicio-light.jpg" alt="Tablero en modo claro" /><p align="center"><b>Modo claro</b></p></td>
@@ -45,18 +53,20 @@ Las tiendas chicas de ropa y skate llevan el stock en un cuaderno o en Excel. No
 - **Una sola fuente de verdad:** web y API validan con los mismos esquemas Zod y calculan con las mismas funciones. La vista previa de un aumento muestra exactamente lo que se va a guardar ([ADR 0001](docs/adr/0001-monorepo-con-paquete-compartido.md)).
 - **Seguridad:** permisos por rol aplicados en el servidor, aislamiento entre comercios, refresh token rotativo en cookie httpOnly con detección de reutilización, rate limiting, CSP y modo demo que impide tomar el control de las cuentas compartidas. Detalle y riesgos aceptados en [SECURITY.md](SECURITY.md).
 - **Dinero en centavos enteros**, sin errores de punto flotante ([ADR 0002](docs/adr/0002-dinero-en-centavos-enteros.md)).
-- **Más de 80 tests** (unitarios, de API contra Postgres real y Playwright en escritorio y celular) que corren en cada push con GitHub Actions.
+- **Unos 200 tests** (unitarios, de API contra Postgres real y Playwright en escritorio y celular) que corren en cada push con GitHub Actions.
 - **Desplegado gratis** en Netlify + Render + Neon, con proxy de mismo origen y manejo del "servidor dormido" ([guía de deploy](docs/DEPLOY.md)).
 
 ## Funcionalidades
 
 - **Punto de venta:** búsqueda instantánea y soporte para lector de código de barras (escanear + Enter agrega el producto). Carrito que sobrevive a una recarga, cálculo de vuelto con atajos de billetes y cuatro medios de pago. Barra de cobro fija en el celular.
-- **Productos y stock:** catálogo con filtros guardados en la URL. Ingresos de mercadería (con actualización de costo), pérdidas con motivo y recuentos físicos. Cada movimiento queda en un libro auditable.
+- **Productos y stock:** catálogo con filtros y orden por cualquier columna guardados en la URL. Ingresos de mercadería (con actualización de costo), pérdidas con motivo y recuentos físicos. Cada movimiento queda en un libro auditable.
+- **Planillas (Excel, Google Sheets o LibreOffice):** exportá el catálogo a CSV, editalo y volvé a importarlo para crear o actualizar productos en masa, con una vista previa de cada cambio antes de guardar. El conteo de inventario se carga igual: se imprime la planilla, se anota lo contado y se aplican solo las diferencias.
 - **Precios:** "subí 8 % todas las remeras y redondeá a $100". Vista previa con el margen antes y después, posibilidad de excluir productos e historial de precios por producto.
 - **Ventas:** historial por período, detalle con costo y ganancia (según el rol) y anulación con motivo que devuelve el stock.
-- **Reportes:** ventas por día, ganancia bruta, ticket promedio, ventas por categoría y por medio de pago, y ranking de productos.
-- **Equipo:** alta de usuarios, roles y desactivación (que cierra sus sesiones al instante).
-- **Identidad punk de póster impreso:** blanco y tinta negra, tipografía condensada, bordes duros y sombras tipo sticker. Un único acento naranja seguridad marca solo los puntos de interacción (acción principal, foco, selección e ítem activo).
+- **Reportes:** ventas por día, ganancia bruta, ticket promedio, ventas por categoría y por medio de pago, y ranking de productos. Cada uno se descarga en CSV.
+- **Equipo:** alta de usuarios, roles y desactivación (que cierra sus sesiones al instante). Cada usuario puede subir su foto de perfil o volver a sus iniciales.
+- **Buscador global:** <kbd>Ctrl</kbd> + <kbd>K</kbd> (<kbd>⌘</kbd> + <kbd>K</kbd> en Mac) busca productos y pantallas desde cualquier lugar.
+- **Diseño moderno y limpio:** tipografía Geist, grises *slate*, bordes finos, sombras suaves y esquinas redondeadas. El acento índigo, con un degradado índigo → violeta en las acciones principales y los títulos destacados, marca solo los puntos de interacción.
 - Modo claro y oscuro, diseño responsive y accesible: contraste AA, navegación por teclado, gráficos con vista de tabla y estados que nunca dependen solo del color.
 
 ### Datos de la demo
@@ -180,7 +190,7 @@ Guía paso a paso en **[docs/DEPLOY.md](docs/DEPLOY.md)**. Todo en planes gratui
 - **Web → Netlify** (`netlify.toml`): build del workspace web y SPA routing. Netlify reenvía `/api/*` a la API, así la cookie de sesión es first-party.
 - **API → Render** (`render.yaml`): web service gratuito, con migraciones al arrancar y health check en `/api/health`.
 - **Base → Neon**: Postgres gratuito que no vence (la base gratuita de Render se borra a los 30 días).
-- **Releases manuales**: los PRs se mergean a `main` (copia de prueba gratis en Netlify) y solo se publica lo que llega a `production`, con un PR de release. Así se agrupan cambios y se cuidan los créditos del plan gratuito.
+- **Releases**: los PRs se mergean a `main` (copia de prueba gratis en Netlify) y solo se publica lo que llega a `production`, con un PR de release. Al mergearlo, GitHub Actions crea el tag y el release con notas agrupadas por tipo de cambio.
 
 En el plan gratuito la API se duerme sin uso. La web lo resuelve: despierta el servidor apenas se abre, muestra un aviso mientras tanto y reintenta sola las lecturas. Las escrituras no se reintentan automáticamente para no duplicarlas.
 
@@ -191,7 +201,6 @@ Variables de la API: ver [`apps/api/.env.example`](apps/api/.env.example). Si la
 - Modo sin conexión para el POS (cola de ventas con la misma clave de idempotencia).
 - Variantes agrupadas (talle y color bajo un mismo artículo; hoy cada talle es un SKU propio) y combos, como un skate armado con sus partes.
 - Proveedores y órdenes de compra.
-- Exportar reportes a CSV.
 
 ## Autor
 

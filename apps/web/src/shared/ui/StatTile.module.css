@@ -1,4 +1,5 @@
 .tile {
+  container-type: inline-size;
   display: grid;
   gap: var(--space-1);
   padding: var(--space-4) var(--space-5);
@@ -9,60 +10,84 @@
 }
 
 .label {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-muted);
 }
 
 .value {
   font-size: var(--text-xl);
-  font-stretch: 75%;
-  font-weight: 800;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   overflow-wrap: anywhere;
 }
 
 .hero .value {
-  font-size: var(--text-hero);
+  /* La cifra principal se ajusta al ancho de la tarjeta (cqi) y nunca se parte a la mitad. */
+  font-size: clamp(var(--text-xl), 17cqi, 3.25rem);
   line-height: 1;
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 
-/* El número principal del tablero, como titular de fanzine. */
+/* El número principal del tablero, sobre el degradado de marca. */
 .hero {
-  background: var(--color-ink);
-  color: var(--color-page);
-  border-color: var(--color-ink);
+  background: var(--gradient-accent);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 12px 32px -12px rgb(79 70 229 / 0.6);
 }
 
 .hero .label,
-.hero .delta {
-  color: var(--color-page);
+.hero .hint {
+  color: rgb(255 255 255 / 0.85);
 }
 
-.hero .delta {
-  opacity: 0.85;
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }
 
+/* Variación como pastilla: verde si sube, roja si baja, gris si se mantiene. */
 .delta {
   display: inline-flex;
   align-items: center;
-  gap: 0.25em;
+  gap: 2px;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  color: var(--color-ink-2);
   font-size: var(--text-xs);
-  font-weight: 550;
-  color: var(--color-muted);
+  font-weight: 600;
 }
 
 .up {
+  background: var(--color-success-soft);
   color: var(--color-success);
 }
 
 .down {
+  background: var(--color-danger-soft);
   color: var(--color-danger);
+}
+
+.hero .delta {
+  background: rgb(255 255 255 / 0.18);
+  color: #ffffff;
 }
 
 .hint {
   font-size: var(--text-xs);
   color: var(--color-muted);
+}
+
+.trend {
+  margin-top: var(--space-2);
+  color: var(--color-chart-active);
+}
+
+.hero .trend {
+  color: #ffffff;
 }

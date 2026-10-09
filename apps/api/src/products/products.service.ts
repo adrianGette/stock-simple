@@ -9,6 +9,7 @@ import {
   type SortDirection,
   type UpdateProductInput,
   can,
+  type CsvColumn,
   csvHeader,
   csvRows,
 } from '@stock/shared'
@@ -17,7 +18,7 @@ import { AppError } from '../common/app-error'
 import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { productCsvColumns } from './product.csv'
-import { toProductDto } from './product.mapper'
+import { type ProductWithCategory, toProductDto } from './product.mapper'
 
 const EXPORT_BATCH_SIZE = 500
 
@@ -97,8 +98,11 @@ export class ProductsService {
    * por offset: no se vuelve más lento a medida que avanza y no repite ni saltea filas si mientras
    * tanto se crean productos o cambia su stock.
    */
-  async *exportCsv(user: RequestUser, query: ProductExportQuery): AsyncGenerator<string> {
-    const columns = productCsvColumns(can(user.role, 'products:view-cost'))
+  async *exportCsv(
+    user: RequestUser,
+    query: ProductExportQuery,
+    columns: CsvColumn<ProductWithCategory>[] = productCsvColumns(can(user.role, 'products:view-cost')),
+  ): AsyncGenerator<string> {
     const where = this.whereFor(user, query)
     yield csvHeader(columns)
 

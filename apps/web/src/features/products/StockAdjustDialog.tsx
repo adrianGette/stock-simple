@@ -27,7 +27,7 @@ const DESCRIPTIONS: Record<AdjustmentType, string> = {
 
 export function StockAdjustDialog({ open, onClose, product }: { open: boolean; onClose: () => void; product: ProductDto }) {
   return (
-    <Dialog open={open} onClose={onClose} title={`Ajustar stock · ${product.name}`}>
+    <Dialog open={open} onClose={onClose} title="Ajustar stock" description={product.name} icon="layers">
       {open && <AdjustForm product={product} onDone={onClose} />}
     </Dialog>
   )

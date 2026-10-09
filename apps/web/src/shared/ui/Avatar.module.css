@@ -1,0 +1,37 @@
+.avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-full);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  object-fit: cover;
+  /* Un anillo fino separa el avatar del fondo, sobre todo en modo oscuro. */
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 3px var(--color-border);
+  user-select: none;
+}
+
+.sm {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.625rem;
+}
+
+.md {
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: var(--text-xs);
+}
+
+.lg {
+  width: 3rem;
+  height: 3rem;
+  font-size: var(--text-md);
+}
+
+.xl {
+  width: 6rem;
+  height: 6rem;
+  font-size: var(--text-2xl);
+}

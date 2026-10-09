@@ -2,6 +2,7 @@ import { PAYMENT_METHOD_LABELS, voidSaleSchema } from '@stock/shared'
 import { useState } from 'react'
 import { errorMessage } from '../../lib/api-client'
 import { formatDateTime, formatMoney } from '../../lib/format'
+import { Avatar } from '../../shared/ui/Avatar'
 import { Badge } from '../../shared/ui/Badge'
 import { Button } from '../../shared/ui/Button'
 import { Dialog } from '../../shared/ui/Dialog'
@@ -19,8 +20,27 @@ export function SaleDetailDialog({ saleId, onClose }: { saleId: string | null; o
   const [voiding, setVoiding] = useState(false)
 
   const title = sale.data ? `Venta #${sale.data.number}` : 'Venta'
+  const canVoid = sale.data?.status === 'COMPLETED' && user.can('sales:void')
   return (
-    <Dialog open={saleId !== null} onClose={onClose} title={title} wide>
+    <Dialog
+      open={saleId !== null}
+      onClose={() => {
+        setVoiding(false)
+        onClose()
+      }}
+      title={title}
+      description={sale.data ? formatDateTime(sale.data.createdAt) : undefined}
+      icon="receipt"
+      wide
+      footer={
+        canVoid &&
+        !voiding && (
+          <Button variant="ghost" icon="undo" className={styles.voidButton} onClick={() => setVoiding(true)}>
+            Anular venta
+          </Button>
+        )
+      }
+    >
       {sale.isPending ? (
         <LoadingState />
       ) : sale.isError ? (
@@ -28,19 +48,18 @@ export function SaleDetailDialog({ saleId, onClose }: { saleId: string | null; o
       ) : (
         <div className={styles.detail}>
           <dl className={styles.facts}>
-            <div>
-              <dt>Fecha</dt>
-              <dd className="tabular">{formatDateTime(sale.data.createdAt)}</dd>
-            </div>
-            <div>
+            <div className={styles.fact}>
               <dt>Vendió</dt>
-              <dd>{sale.data.user.name}</dd>
+              <dd className={styles.person}>
+                <Avatar name={sale.data.user.name} userId={sale.data.user.id} photoVersion={sale.data.user.photoVersion} size="sm" />
+                {sale.data.user.name}
+              </dd>
             </div>
-            <div>
+            <div className={styles.fact}>
               <dt>Medio de pago</dt>
               <dd>{PAYMENT_METHOD_LABELS[sale.data.paymentMethod]}</dd>
             </div>
-            <div>
+            <div className={styles.fact}>
               <dt>Estado</dt>
               <dd>
                 {sale.data.status === 'VOIDED' ? (
@@ -100,30 +119,26 @@ export function SaleDetailDialog({ saleId, onClose }: { saleId: string | null; o
             </table>
           </div>
 
-          <div className={styles.totals}>
+          <dl className={styles.totals}>
             {sale.data.costCents !== undefined && (
               <>
-                <span>Costo de mercadería</span>
-                <span className="tabular">{formatMoney(sale.data.costCents)}</span>
-                <span>Ganancia</span>
-                <span className="tabular">{formatMoney(sale.data.totalCents - sale.data.costCents)}</span>
+                <div className={styles.totalRow}>
+                  <dt>Costo de mercadería</dt>
+                  <dd className="tabular">{formatMoney(sale.data.costCents)}</dd>
+                </div>
+                <div className={styles.totalRow}>
+                  <dt>Ganancia</dt>
+                  <dd className={`tabular ${styles.profit}`}>{formatMoney(sale.data.totalCents - sale.data.costCents)}</dd>
+                </div>
               </>
             )}
-            <strong>Total</strong>
-            <strong className="tabular">{formatMoney(sale.data.totalCents)}</strong>
-          </div>
-
-          {sale.data.status === 'COMPLETED' && user.can('sales:void') && (
-            <div className={styles.voidArea}>
-              {voiding ? (
-                <VoidForm saleId={sale.data.id} onDone={() => setVoiding(false)} />
-              ) : (
-                <Button variant="ghost" icon="undo" onClick={() => setVoiding(true)}>
-                  Anular venta
-                </Button>
-              )}
+            <div className={`${styles.totalRow} ${styles.grandTotal}`}>
+              <dt>Total</dt>
+              <dd className="tabular">{formatMoney(sale.data.totalCents)}</dd>
             </div>
-          )}
+          </dl>
+
+          {voiding && <VoidForm saleId={sale.data.id} onDone={() => setVoiding(false)} />}
         </div>
       )}
     </Dialog>

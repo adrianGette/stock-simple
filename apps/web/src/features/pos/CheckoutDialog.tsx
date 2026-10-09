@@ -52,6 +52,7 @@ export function CheckoutDialog({ open, cart, onClose, onSuccess }: CheckoutDialo
       open={open}
       onClose={onClose}
       title="Cobrar venta"
+      icon="cash"
       dismissible={!createSale.isPending}
       footer={
         <>

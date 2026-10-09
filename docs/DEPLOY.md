@@ -92,7 +92,9 @@ Los dos servicios publican **solo** la rama `production`. `main` es la rama de t
 | `main` | Cada cambio entra por PR | Copia de prueba en `https://main--TU-SITIO.netlify.app` (gratis) |
 | `production` | Lo que ve la gente | El sitio público y la API de Render |
 
-**Para hacer un release:** en GitHub, **Pull requests → New pull request**, base `production` ← compare `main`. Título `Release AAAA-MM-DD`. Cuando el CI esté en verde, **Create a merge commit** (nunca squash: si no, las ramas se separan y el próximo release trae conflictos). Netlify y Render deployan solos. El historial de releases queda en los PRs mergeados a `production`.
+**Para hacer un release:** en GitHub, **Pull requests → New pull request**, base `production` ← compare `main`. Título `RELEASE vX.Y.Z · DD-MM-AAAA`, con versionado semántico: sube el último número si son solo arreglos (`v1.2.1`), el del medio si hay funcionalidades nuevas (`v1.3.0`) y el primero si algo deja de ser compatible (`v2.0.0`). Cuando el CI esté en verde, **Create a merge commit** (nunca squash: si no, las ramas se separan y el próximo release trae conflictos). Netlify y Render deployan solos.
+
+Al mergear, el workflow `.github/workflows/release.yml` publica el **GitHub Release** sin pasos manuales: lee la versión del título, crea el tag sobre el commit del merge y genera las notas agrupadas por la etiqueta de cada PR (`enhancement`, `bug`, `documentation`; ver `.github/release.yml`). Si el título no tiene el formato o la versión ya existe, el workflow falla con un mensaje claro y no publica nada. Por eso conviene ponerle etiqueta a cada PR.
 
 Configuración (una sola vez):
 
@@ -108,10 +110,12 @@ Configuración (una sola vez):
 | `Variables de entorno inválidas` en el log de Render | Falta `DATABASE_URL` o `WEB_ORIGIN`, o tienen un formato inválido. |
 | Login correcto, pero al recargar te saca | `WEB_ORIGIN` no coincide con la URL de Netlify, o el proxy de `netlify.toml` apunta a otra URL. |
 | `Demasiados intentos` | El rate limit de login es de 5 por minuto por IP. Si aparece con poco uso, revisá `TRUST_PROXY_HOPS=2`. |
-| El sitio muestra "Site not available" | Se terminaron los créditos del mes de Netlify (sobre todo por deploys). Vuelve el mes siguiente. |
+| El sitio muestra "Site not available" | Se terminó la cuota gratuita del mes de Netlify (ver "Mantenerlo gratis"). Vuelve el mes siguiente. |
 
 ## Mantenerlo gratis
 
-- Solo los releases (merge a `production`) consumen créditos de Netlify: 15 cada uno. Agrupá varios PRs por release (por ejemplo, uno por semana) y quedás muy lejos del límite. Los branch deploys, deploy previews y deploys fallidos no consumen.
+- Netlify tiene dos planes gratuitos según la antigüedad de la cuenta. Fijate el tuyo en **Team → Usage & billing**:
+  - **Con créditos** (cuentas nuevas): cada deploy a producción (un release) consume créditos. Agrupá varios PRs por release, por ejemplo uno por semana.
+  - **Legacy, con minutos de build** (cuentas anteriores): 300 minutos por mes, compartidos por todos los builds (producción, el branch deploy de `main` y los deploy previews), de alrededor de 1 minuto cada uno. Sobra para varios releases por semana.
 - No uses la base de Postgres de Render: se borra a los 30 días.
 - Para resetear la demo, volvé a correr el seed contra Neon (paso 2).

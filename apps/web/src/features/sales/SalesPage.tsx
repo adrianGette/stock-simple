@@ -10,8 +10,9 @@ import { useState } from 'react'
 import { formatDateTime, formatMoney } from '../../lib/format'
 import { useQueryParams } from '../../shared/hooks/useQueryParams'
 import { type RangePreset, RANGE_PRESETS, rangeFor } from '../../shared/lib/date-range'
+import { Avatar } from '../../shared/ui/Avatar'
 import { Badge } from '../../shared/ui/Badge'
-import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
+import { EmptyState, ErrorState, TableSkeleton } from '../../shared/ui/Feedback'
 import { Select } from '../../shared/ui/Field'
 import { Card, Page, PageHeader, Toolbar } from '../../shared/ui/Layout'
 import { Pagination } from '../../shared/ui/Pagination'
@@ -78,7 +79,7 @@ export function SalesPage() {
         <Select
           aria-label="Período"
           value={preset}
-          onChange={(event) => update({ periodo: event.target.value === DEFAULT_PRESET ? null : event.target.value })}
+          onValueChange={(value) => update({ periodo: value === DEFAULT_PRESET ? null : value })}
           style={{ width: 'auto' }}
         >
           {RANGE_PRESETS.map((option) => (
@@ -90,7 +91,7 @@ export function SalesPage() {
         <Select
           aria-label="Medio de pago"
           value={paymentMethod ?? ''}
-          onChange={(event) => update({ pago: event.target.value || null })}
+          onValueChange={(value) => update({ pago: value || null })}
           style={{ width: 'auto' }}
         >
           <option value="">Todos los medios de pago</option>
@@ -111,7 +112,7 @@ export function SalesPage() {
 
       <Card flush>
         {sales.isPending ? (
-          <LoadingState />
+          <TableSkeleton columns={6} />
         ) : sales.isError ? (
           <ErrorState error={sales.error} onRetry={() => sales.refetch()} />
         ) : sales.data.items.length === 0 ? (
@@ -153,7 +154,14 @@ export function SalesPage() {
                     <td data-label="Fecha" className="tabular">
                       {formatDateTime(sale.createdAt)}
                     </td>
-                    {seesAll && <td data-label="Vendió">{sale.user.name}</td>}
+                    {seesAll && (
+                      <td data-label="Vendió">
+                        <span className={table.person}>
+                          <Avatar name={sale.user.name} userId={sale.user.id} photoVersion={sale.user.photoVersion} size="sm" />
+                          {sale.user.name}
+                        </span>
+                      </td>
+                    )}
                     <td data-label="Pago">{PAYMENT_METHOD_LABELS[sale.paymentMethod]}</td>
                     <td data-label="Productos" className={table.num}>
                       {sale.itemCount}

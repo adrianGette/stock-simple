@@ -1,4 +1,4 @@
-@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
 @import './tokens.css';
 
@@ -38,17 +38,16 @@ p {
 h1,
 h2,
 h3 {
-  letter-spacing: -0.005em;
-  line-height: 1.05;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   text-wrap: balance;
 }
 
-/* Títulos de póster: Archivo condensada, pesada y en mayúsculas. */
+/* Títulos principales: peso alto y letras más juntas, en minúsculas normales. */
 h1,
 .display {
-  font-stretch: var(--display-stretch);
   font-weight: var(--display-weight);
-  text-transform: uppercase;
+  letter-spacing: var(--display-tracking);
 }
 
 p {

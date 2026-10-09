@@ -40,7 +40,7 @@
   border: var(--stroke) solid var(--color-ink);
   border-left: 6px solid var(--color-accent);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-hard);
+  box-shadow: var(--shadow-md);
   font-size: var(--text-sm);
   animation: enter 220ms var(--ease-out);
 }

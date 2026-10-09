@@ -73,6 +73,11 @@ model User {
   role         Role
   active       Boolean   @default(true)
   lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(3)
+  /// Foto de perfil: WebP cuadrado de 256 px (la web la recorta y comprime antes de subirla).
+  /// PrismaService la omite en todas las consultas salvo que se pida explícitamente.
+  photo          Bytes?
+  /// Cuándo cambió la foto: la web la usa como versión para no mostrar una vieja guardada en caché.
+  photoUpdatedAt DateTime? @map("photo_updated_at") @db.Timestamptz(3)
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 

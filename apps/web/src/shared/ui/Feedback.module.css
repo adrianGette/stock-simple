@@ -7,15 +7,37 @@
   color: var(--color-ink-2);
 }
 
+/* Ícono del estado vacío: círculo con el degradado suave de marca y dos anillos concéntricos. */
 .icon {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  margin-bottom: var(--space-1);
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: var(--space-4) 0 var(--space-3);
   border-radius: var(--radius-full);
-  background: var(--color-surface-2);
-  color: var(--color-muted);
+  background: linear-gradient(135deg, var(--color-accent-soft), var(--color-surface));
+  color: var(--color-accent-text);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--color-border);
+}
+
+.icon::before,
+.icon::after {
+  content: '';
+  position: absolute;
+  border-radius: var(--radius-full);
+  border: var(--stroke) solid var(--color-border);
+  pointer-events: none;
+}
+
+.icon::before {
+  inset: -10px;
+  opacity: 0.7;
+}
+
+.icon::after {
+  inset: -22px;
+  opacity: 0.35;
 }
 
 .errorIcon {
@@ -25,9 +47,8 @@
 
 .title {
   font-size: var(--text-lg);
-  font-stretch: var(--display-stretch);
-  font-weight: var(--display-weight);
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--color-ink);
 }
 
@@ -53,4 +74,53 @@
   to {
     rotate: 360deg;
   }
+}
+
+.skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--color-surface-2) 25%, var(--color-surface-hover) 50%, var(--color-surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+.tableSkeleton {
+  display: grid;
+  padding: var(--space-2) var(--space-5);
+}
+
+.skeletonRow {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+  height: 3.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skeletonRow:last-child {
+  border-bottom: 0;
+}
+
+.tilesSkeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--space-3);
+}
+
+.tileSkeleton {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: var(--stroke) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
 }

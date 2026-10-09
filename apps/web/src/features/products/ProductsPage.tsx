@@ -6,7 +6,7 @@ import { useDebouncedValue } from '../../shared/hooks/useDebouncedValue'
 import { useDownload } from '../../shared/hooks/useDownload'
 import { useQueryParams } from '../../shared/hooks/useQueryParams'
 import { Button } from '../../shared/ui/Button'
-import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
+import { EmptyState, ErrorState, TableSkeleton } from '../../shared/ui/Feedback'
 import { SearchInput, Select } from '../../shared/ui/Field'
 import { Card, Page, PageHeader, Toolbar, layoutStyles } from '../../shared/ui/Layout'
 import { Pagination } from '../../shared/ui/Pagination'
@@ -17,6 +17,7 @@ import table from '../../shared/ui/table.module.css'
 import { useCurrentUser } from '../auth/AuthProvider'
 import { CategoriesDialog } from './CategoriesDialog'
 import { ImportProductsDialog } from './ImportProductsDialog'
+import { InventoryCountDialog } from './InventoryCountDialog'
 import { ProductFormDialog } from './ProductFormDialog'
 import { StockBadge } from './StockBadge'
 import { type ProductFilters, exportProducts, useCategories, useProducts } from './api'
@@ -52,6 +53,8 @@ export function ProductsPage() {
   const [creating, setCreating] = useState(false)
   const [managingCategories, setManagingCategories] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [counting, setCounting] = useState(false)
+  const canCount = user.can('stock:adjust')
 
   const [params, update] = useQueryParams()
   const [search, setSearch] = useState(params.get('q') ?? '')
@@ -75,6 +78,17 @@ export function ProductsPage() {
 
   const exporting = useDownload()
 
+  // Para el conteo: qué productos trae la planilla si hay filtros aplicados.
+  const filtersLabel =
+    [
+      categoryId && `categoría ${categories.data?.find((category) => category.id === categoryId)?.name ?? ''}`.trim(),
+      stock === 'low' && 'stock bajo',
+      stock === 'out' && 'sin stock',
+      q && `búsqueda «${q}»`,
+    ]
+      .filter(Boolean)
+      .join(', ') || null
+
   // La búsqueda se escribe en la URL con debounce, para no generar una entrada de historial por tecla.
   const urlQuery = params.get('q') ?? ''
   useEffect(() => {
@@ -92,6 +106,11 @@ export function ProductsPage() {
             <Button icon="download" loading={exporting.downloading} onClick={() => exporting.download(() => exportProducts(filters))}>
               Exportar
             </Button>
+            {canCount && (
+              <Button icon="clipboardCheck" onClick={() => setCounting(true)}>
+                Conteo
+              </Button>
+            )}
             {canWrite && (
               <>
                 <Button icon="upload" onClick={() => setImporting(true)}>
@@ -120,7 +139,7 @@ export function ProductsPage() {
         <Select
           aria-label="Categoría"
           value={categoryId}
-          onChange={(event) => update({ categoria: event.target.value || null })}
+          onValueChange={(value) => update({ categoria: value || null })}
           style={{ width: 'auto' }}
         >
           <option value="">Todas las categorías</option>
@@ -141,7 +160,7 @@ export function ProductsPage() {
 
       <Card flush>
         {products.isPending ? (
-          <LoadingState />
+          <TableSkeleton columns={5} />
         ) : products.isError ? (
           <ErrorState error={products.error} onRetry={() => products.refetch()} />
         ) : products.data.items.length === 0 ? (
@@ -206,6 +225,7 @@ export function ProductsPage() {
       <ProductFormDialog open={creating} onClose={() => setCreating(false)} onSaved={(p) => navigate(`/productos/${p.id}`)} />
       <CategoriesDialog open={managingCategories} onClose={() => setManagingCategories(false)} />
       <ImportProductsDialog open={importing} onClose={() => setImporting(false)} />
+      <InventoryCountDialog open={counting} onClose={() => setCounting(false)} filters={filters} filtersLabel={filtersLabel} />
     </Page>
   )
 }

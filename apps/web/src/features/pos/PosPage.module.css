@@ -14,7 +14,7 @@
 .searchInput input {
   height: 3.25rem;
   font-size: var(--text-lg);
-  box-shadow: var(--shadow-hard);
+  box-shadow: var(--shadow-md);
 }
 
 .searchHint {
@@ -61,20 +61,17 @@ kbd {
   text-align: left;
   cursor: pointer;
   transition:
-    border-color 100ms,
-    box-shadow 90ms,
-    translate 90ms;
+    border-color 120ms,
+    box-shadow 120ms;
 }
 
 .productButton:hover:not(:disabled) {
   border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-hard);
-  translate: -1px -1px;
+  box-shadow: var(--shadow-md);
 }
 
 .productButton:active:not(:disabled) {
-  box-shadow: none;
-  translate: 2px 2px;
+  scale: 0.98;
 }
 
 .productButton:disabled {
@@ -104,13 +101,11 @@ kbd {
 .inCart {
   white-space: nowrap;
   padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  background: var(--color-accent);
-  color: var(--color-accent-ink);
-  font-size: 0.6875rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-ink);
+  font-size: var(--text-xs);
+  font-weight: 600;
 }
 
 .cart {
@@ -135,9 +130,8 @@ kbd {
 
 .cartTitle {
   font-size: var(--text-lg);
-  font-stretch: var(--display-stretch);
-  font-weight: var(--display-weight);
-  text-transform: uppercase;
+  font-weight: 650;
+  letter-spacing: -0.02em;
 }
 
 .lines {
@@ -240,8 +234,8 @@ kbd {
 
 .totalValue {
   font-size: var(--text-2xl);
-  font-stretch: 75%;
-  font-weight: 850;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .mobileBar {
@@ -285,11 +279,11 @@ kbd {
     justify-content: space-between;
     gap: var(--space-3);
     padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
-    border: var(--stroke) solid var(--color-ink);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background: var(--color-ink);
-    color: var(--color-page);
-    box-shadow: 4px 4px 0 var(--color-accent);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-lg);
   }
 
   .mobileBar small {

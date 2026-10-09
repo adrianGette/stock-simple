@@ -56,6 +56,16 @@ describe('Modo demo (cuentas compartidas)', () => {
     expect(await prisma.user.count()).toBe(before)
   })
 
+  it('no se pueden subir ni quitar fotos de perfil: cualquier visitante las vería', async () => {
+    const webp = Buffer.alloc(32)
+    webp.write('RIFF', 0, 'ascii')
+    webp.write('WEBP', 8, 'ascii')
+    const upload = await http().put('/api/users/me/photo').set(auth(shop.tokens.CASHIER)).set('Content-Type', 'image/webp').send(webp)
+    expect(upload.status).toBe(403)
+    expect(upload.body.code).toBe('DEMO_READ_ONLY')
+    expect((await http().delete('/api/users/me/photo').set(auth(shop.tokens.CASHIER))).status).toBe(403)
+  })
+
   it('el resto de la app funciona normal: se puede vender', async () => {
     const productId = await shop.product({ stock: 3 })
     const res = await http()

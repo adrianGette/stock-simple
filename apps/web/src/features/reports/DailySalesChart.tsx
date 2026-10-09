@@ -70,6 +70,8 @@ export function DailySalesChart({ daily, showProfit = true, height }: DailySales
           height={height}
           ariaLabel={`Ventas por día: ${daily.length} días, total ${formatMoney(total)}. Usá las flechas para recorrer los días.`}
           formatTick={formatMoneyCompact}
+          // Los períodos siempre terminan hoy: el último día queda resaltado.
+          highlightLast
           renderTooltip={(d) => (
             <>
               <span className={tooltipStyles.title}>{formatShortDay(d.date)}</span>

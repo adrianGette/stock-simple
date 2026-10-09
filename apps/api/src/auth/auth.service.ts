@@ -24,10 +24,18 @@ const userWithBusiness = {
   email: true,
   role: true,
   active: true,
+  photoUpdatedAt: true,
   business: { select: { id: true, name: true } },
 } as const
 
-type UserWithBusiness = { id: string; name: string; email: string; role: AuthUser['role']; business: AuthUser['business'] }
+type UserWithBusiness = {
+  id: string
+  name: string
+  email: string
+  role: AuthUser['role']
+  business: AuthUser['business']
+  photoUpdatedAt: Date | null
+}
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex')
 
@@ -102,6 +110,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
       business: user.business,
+      photoVersion: user.photoUpdatedAt?.toISOString() ?? null,
       demoMode: this.config.get('DEMO_MODE', { infer: true }),
     }
   }
