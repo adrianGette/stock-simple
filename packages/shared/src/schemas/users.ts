@@ -31,4 +31,6 @@ export interface UserDto {
   active: boolean
   createdAt: string
   lastLoginAt: string | null
+  /** Versión de la foto de perfil (cuándo cambió); null si no tiene foto. */
+  photoVersion: string | null
 }

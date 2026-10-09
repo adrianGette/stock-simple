@@ -13,6 +13,8 @@ export interface AuthUser {
   email: string
   role: Role
   business: { id: string; name: string }
+  /** Versión de la foto de perfil (cuándo cambió); null si no tiene foto. */
+  photoVersion: string | null
   /**
    * Demo pública: las cuentas son compartidas por todos los visitantes, así que la API
    * bloquea crear o modificar usuarios (si no, alguien podría cambiar la contraseña y dejar

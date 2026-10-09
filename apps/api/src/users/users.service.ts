@@ -82,7 +82,7 @@ export class UsersService {
   }
 }
 
-function toUserDto(user: User): UserDto {
+function toUserDto(user: Omit<User, 'photo'>): UserDto {
   return {
     id: user.id,
     name: user.name,
@@ -91,5 +91,6 @@ function toUserDto(user: User): UserDto {
     active: user.active,
     createdAt: user.createdAt.toISOString(),
     lastLoginAt: user.lastLoginAt?.toISOString() ?? null,
+    photoVersion: user.photoUpdatedAt?.toISOString() ?? null,
   }
 }

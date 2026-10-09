@@ -134,7 +134,7 @@ export function refreshSession(): Promise<AuthResponse | null> {
 type QueryValue = string | number | boolean | null | undefined
 
 export interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   body?: unknown
   query?: Record<string, QueryValue>
   signal?: AbortSignal
@@ -154,6 +154,11 @@ export async function downloadFile(path: string, options: RequestOptions = {}): 
   const response = await request(path, options)
   const filename = /filename="([^"]+)"/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? 'descarga'
   saveFile(await response.blob(), filename)
+}
+
+/** Trae un archivo binario (p. ej. una foto) con el token de la sesión, para mostrarlo en la página. */
+export async function fetchBlob(path: string, options: RequestOptions = {}): Promise<Blob> {
+  return (await request(path, options)).blob()
 }
 
 /** Le entrega un archivo generado en el navegador al usuario, como si viniera de un link de descarga. */
