@@ -153,7 +153,12 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
 export async function downloadFile(path: string, options: RequestOptions = {}): Promise<void> {
   const response = await request(path, options)
   const filename = /filename="([^"]+)"/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? 'descarga'
-  const url = URL.createObjectURL(await response.blob())
+  saveFile(await response.blob(), filename)
+}
+
+/** Le entrega un archivo generado en el navegador al usuario, como si viniera de un link de descarga. */
+export function saveFile(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
   link.download = filename
@@ -170,6 +175,8 @@ async function request(path: string, options: RequestOptions, retried = false): 
   }
 
   const method = options.method ?? 'GET'
+  // Un archivo (Blob) viaja tal cual, con su propio tipo; cualquier otro cuerpo, como JSON.
+  const isFile = options.body instanceof Blob
   let response: Response
   try {
     response = await fetch(url, {
@@ -177,10 +184,10 @@ async function request(path: string, options: RequestOptions, retried = false): 
       credentials: 'include',
       signal: options.signal,
       headers: {
-        ...(options.body !== undefined && { 'Content-Type': 'application/json' }),
+        ...(options.body !== undefined && { 'Content-Type': isFile ? (options.body as Blob).type : 'application/json' }),
         ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       },
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      body: isFile ? (options.body as Blob) : options.body !== undefined ? JSON.stringify(options.body) : undefined,
     })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error

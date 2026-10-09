@@ -1,6 +1,6 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common'
 import { ThrottlerException } from '@nestjs/throttler'
-import type { ApiErrorBody, ErrorCode } from '@stock/shared'
+import { type ApiErrorBody, type ErrorCode, PRODUCT_IMPORT_MAX_BYTES } from '@stock/shared'
 import type { Response } from 'express'
 import { Prisma } from '../generated/prisma/client'
 import { AppError } from './app-error'
@@ -36,6 +36,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus()
       return { statusCode: status, code: CODE_BY_STATUS[status] ?? 'INTERNAL_ERROR', message: this.messageFor(status, exception.message) }
     }
+    // body-parser corta los cuerpos que superan su límite antes de llegar al controlador (p. ej. un CSV de importación).
+    if (isBodyTooLarge(exception)) {
+      const megabytes = Math.round(PRODUCT_IMPORT_MAX_BYTES / 1024 / 1024)
+      return { statusCode: 413, code: 'FILE_TOO_LARGE', message: `El archivo supera el máximo de ${megabytes} MB.` }
+    }
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       if (exception.code === 'P2002') {
         return { statusCode: 409, code: 'CONFLICT', message: 'Ya existe un registro con esos datos' }
@@ -60,4 +65,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         return fallback
     }
   }
+}
+
+function isBodyTooLarge(exception: unknown): boolean {
+  return typeof exception === 'object' && exception !== null && 'type' in exception && exception.type === 'entity.too.large'
 }

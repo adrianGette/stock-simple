@@ -22,6 +22,8 @@ const PATHS = {
   chevronLeft: 'm15 18-6-6 6-6',
   chevronRight: 'm9 18 6-6-6-6',
   chevronDown: 'm6 9 6 6 6-6',
+  chevronUp: 'm18 15-6-6-6 6',
+  chevronsUpDown: 'm7 15 5 5 5-5M7 9l5-5 5 5',
   more: 'M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2M19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2M5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2',
   edit: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
   trash: 'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6',
@@ -32,6 +34,7 @@ const PATHS = {
   undo: 'M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13',
   layers: 'm12 2 10 5-10 5L2 7zM2 17l10 5 10-5M2 12l10 5 10-5',
   download: 'M12 3v12M7 10l5 5 5-5M4 21h16',
+  upload: 'M12 15V3M7 8l5-5 5 5M4 21h16',
   cash: 'M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 12h.01M18 12h.01',
 } as const
 

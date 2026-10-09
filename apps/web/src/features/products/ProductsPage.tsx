@@ -1,18 +1,22 @@
-import { marginPercent } from '@stock/shared'
+import { PRODUCT_SORTS, type ProductSort, type SortDirection, marginPercent } from '@stock/shared'
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { formatMoney, formatPercent } from '../../lib/format'
 import { useDebouncedValue } from '../../shared/hooks/useDebouncedValue'
 import { useDownload } from '../../shared/hooks/useDownload'
+import { useQueryParams } from '../../shared/hooks/useQueryParams'
 import { Button } from '../../shared/ui/Button'
 import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
 import { SearchInput, Select } from '../../shared/ui/Field'
 import { Card, Page, PageHeader, Toolbar, layoutStyles } from '../../shared/ui/Layout'
 import { Pagination } from '../../shared/ui/Pagination'
 import { SegmentedControl } from '../../shared/ui/SegmentedControl'
+import { SortableHeader } from '../../shared/ui/SortableHeader'
+import { type SortOption, SortSelect } from '../../shared/ui/SortSelect'
 import table from '../../shared/ui/table.module.css'
 import { useCurrentUser } from '../auth/AuthProvider'
 import { CategoriesDialog } from './CategoriesDialog'
+import { ImportProductsDialog } from './ImportProductsDialog'
 import { ProductFormDialog } from './ProductFormDialog'
 import { StockBadge } from './StockBadge'
 import { type ProductFilters, exportProducts, useCategories, useProducts } from './api'
@@ -24,6 +28,22 @@ const STOCK_FILTERS = [
   { value: 'out', label: 'Sin stock' },
 ] as const
 
+/** Opciones del selector de orden en celular, donde la tabla se vuelve tarjetas y no hay encabezados. */
+const SORT_OPTIONS: SortOption<ProductSort>[] = [
+  { sort: 'name', dir: 'asc', label: 'Nombre (A a Z)' },
+  { sort: 'name', dir: 'desc', label: 'Nombre (Z a A)' },
+  { sort: 'category', dir: 'asc', label: 'Categoría (A a Z)' },
+  { sort: 'category', dir: 'desc', label: 'Categoría (Z a A)' },
+  { sort: 'price', dir: 'asc', label: 'Precio: menor a mayor' },
+  { sort: 'price', dir: 'desc', label: 'Precio: mayor a menor' },
+  { sort: 'margin', dir: 'asc', label: 'Margen: menor a mayor' },
+  { sort: 'margin', dir: 'desc', label: 'Margen: mayor a menor' },
+  { sort: 'stock', dir: 'asc', label: 'Stock: menor a mayor' },
+  { sort: 'stock', dir: 'desc', label: 'Stock: mayor a menor' },
+]
+
+const isProductSort = (value: string | null): value is ProductSort => PRODUCT_SORTS.some((sort) => sort === value)
+
 export function ProductsPage() {
   const user = useCurrentUser()
   const navigate = useNavigate()
@@ -31,30 +51,25 @@ export function ProductsPage() {
   const canSeeCost = user.can('products:view-cost')
   const [creating, setCreating] = useState(false)
   const [managingCategories, setManagingCategories] = useState(false)
+  const [importing, setImporting] = useState(false)
 
-  // Los filtros viven en la URL: se pueden compartir, recargar y volver atrás sin perderlos.
-  const [params, setParams] = useSearchParams()
+  const [params, update] = useQueryParams()
   const [search, setSearch] = useState(params.get('q') ?? '')
   const q = useDebouncedValue(search.trim(), 300)
   const stock = (params.get('stock') ?? 'all') as ProductFilters['stock'] & string
   const categoryId = params.get('categoria') ?? ''
   const page = Number(params.get('pagina') ?? 1)
+  // Un orden inválido en la URL (o por margen sin permiso de ver costos) vuelve al orden por nombre.
+  const sortParam = params.get('orden')
+  const sort: ProductSort = isProductSort(sortParam) && (sortParam !== 'margin' || canSeeCost) ? sortParam : 'name'
+  const dir: SortDirection = params.get('dir') === 'desc' ? 'desc' : 'asc'
 
-  const update = (changes: Record<string, string | null>) =>
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        for (const [key, value] of Object.entries(changes)) {
-          if (value) next.set(key, value)
-          else next.delete(key)
-        }
-        if (!('pagina' in changes)) next.delete('pagina')
-        return next
-      },
-      { replace: true },
-    )
+  // Los valores por defecto (nombre, ascendente) no se escriben en la URL, para que quede corta.
+  const changeSort = (nextSort: ProductSort, nextDir: SortDirection) =>
+    update({ orden: nextSort === 'name' ? null : nextSort, dir: nextDir === 'asc' ? null : nextDir })
+  const sortProps = { sort, dir, onSort: changeSort }
 
-  const filters: ProductFilters = { q: q || undefined, stock, categoryId: categoryId || undefined, page, pageSize: 25 }
+  const filters: ProductFilters = { q: q || undefined, stock, categoryId: categoryId || undefined, sort, dir, page, pageSize: 25 }
   const products = useProducts(filters)
   const categories = useCategories()
 
@@ -79,6 +94,9 @@ export function ProductsPage() {
             </Button>
             {canWrite && (
               <>
+                <Button icon="upload" onClick={() => setImporting(true)}>
+                  Importar
+                </Button>
                 <Button icon="layers" onClick={() => setManagingCategories(true)}>
                   Categorías
                 </Button>
@@ -118,6 +136,7 @@ export function ProductsPage() {
           options={STOCK_FILTERS}
           onChange={(value) => update({ stock: value === 'all' ? null : value })}
         />
+        <SortSelect options={SORT_OPTIONS.filter((option) => option.sort !== 'margin' || canSeeCost)} {...sortProps} />
       </Toolbar>
 
       <Card flush>
@@ -135,19 +154,11 @@ export function ProductsPage() {
               <table className={table.table}>
                 <thead>
                   <tr>
-                    <th scope="col">Producto</th>
-                    <th scope="col">Categoría</th>
-                    <th scope="col" className={table.num}>
-                      Precio
-                    </th>
-                    {canSeeCost && (
-                      <th scope="col" className={table.num}>
-                        Margen
-                      </th>
-                    )}
-                    <th scope="col" className={table.num}>
-                      Stock
-                    </th>
+                    <SortableHeader column="name" label="Producto" {...sortProps} />
+                    <SortableHeader column="category" label="Categoría" {...sortProps} />
+                    <SortableHeader column="price" label="Precio" className={table.num} {...sortProps} />
+                    {canSeeCost && <SortableHeader column="margin" label="Margen" className={table.num} {...sortProps} />}
+                    <SortableHeader column="stock" label="Stock" className={table.num} {...sortProps} />
                   </tr>
                 </thead>
                 <tbody>
@@ -194,6 +205,7 @@ export function ProductsPage() {
 
       <ProductFormDialog open={creating} onClose={() => setCreating(false)} onSaved={(p) => navigate(`/productos/${p.id}`)} />
       <CategoriesDialog open={managingCategories} onClose={() => setManagingCategories(false)} />
+      <ImportProductsDialog open={importing} onClose={() => setImporting(false)} />
     </Page>
   )
 }

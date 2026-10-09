@@ -143,3 +143,55 @@
 .inlineForm > :first-child {
   flex: 1;
 }
+
+/* Importación de productos */
+.importBody {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.importSteps {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.importActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.importFile {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.importSummary {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: var(--text-sm);
+}
+
+.importSummary p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-ink-2);
+}
+
+/* La lista de errores puede ser larga: se desplaza adentro y el diálogo no crece sin fin. */
+.importErrors {
+  max-height: 18rem;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}

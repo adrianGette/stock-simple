@@ -33,6 +33,20 @@ export function formatMoney(cents: Cents, { compact = false } = {}): string {
   return (compact ? currencyCompact : currency).format(cents / 100)
 }
 
+/** Interpreta lo que escribe el usuario en pesos ("1.250,50", "1250.5") y devuelve centavos. */
+export function parsePesos(input: string): number | null {
+  const cleaned = input.replace(/[$\s]/g, '')
+  if (!cleaned) return null
+  // Formato argentino: punto de miles y coma decimal. Si solo hay punto con 1-2 decimales, es decimal.
+  const normalized = cleaned.includes(',')
+    ? cleaned.replace(/\./g, '').replace(',', '.')
+    : /^\d+\.\d{1,2}$/.test(cleaned)
+      ? cleaned
+      : cleaned.replace(/\./g, '')
+  if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return null
+  return Math.round(Number(normalized) * 100)
+}
+
 /**
  * Margen sobre precio de venta, en porcentaje con un decimal.
  * Devuelve null cuando el precio es 0 (no hay margen definible).

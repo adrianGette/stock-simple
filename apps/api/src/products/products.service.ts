@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import {
   type CreateProduct,
   type Paginated,
   type ProductDto,
   type ProductExportQuery,
   type ProductQuery,
+  type ProductSort,
+  type SortDirection,
   type UpdateProductInput,
   can,
   csvHeader,
@@ -19,13 +21,27 @@ import { toProductDto } from './product.mapper'
 
 const EXPORT_BATCH_SIZE = 500
 
-// El id al final desempata: sin un orden total, Postgres puede ordenar distinto los empates
-// en cada consulta y la paginación por offset repite o saltea productos.
-const ORDER_BY: Record<ProductQuery['sort'], Prisma.ProductOrderByWithRelationInput[]> = {
-  name: [{ name: 'asc' }, { id: 'asc' }],
-  stock: [{ stock: 'asc' }, { name: 'asc' }, { id: 'asc' }],
-  price: [{ priceCents: 'desc' }, { name: 'asc' }, { id: 'asc' }],
-  updated: [{ updatedAt: 'desc' }, { id: 'asc' }],
+/**
+ * Orden del listado. Después de la columna elegida se desempata por nombre (para que los empates se
+ * lean en un orden natural) y siempre por id al final: sin un orden total, Postgres puede ordenar
+ * distinto los empates en cada consulta y la paginación por offset repite o saltea productos.
+ */
+function orderBy(sort: ProductSort, dir: SortDirection): Prisma.ProductOrderByWithRelationInput[] {
+  const tieBreak: Prisma.ProductOrderByWithRelationInput[] = [{ name: 'asc' }, { id: 'asc' }]
+  switch (sort) {
+    case 'name':
+      return [{ name: dir }, { id: 'asc' }]
+    case 'category':
+      // Sin categoría: al final en ascendente y al principio en descendente (el orden de Postgres para NULL).
+      return [{ category: { name: dir } }, ...tieBreak]
+    case 'price':
+      return [{ priceCents: dir }, ...tieBreak]
+    case 'margin':
+      // Columna generada por Postgres; sin precio no hay margen y esos van al final.
+      return [{ marginRatio: { sort: dir, nulls: 'last' } }, ...tieBreak]
+    case 'stock':
+      return [{ stock: dir }, ...tieBreak]
+  }
 }
 
 @Injectable()
@@ -52,19 +68,24 @@ export class ProductsService {
   }
 
   async list(user: RequestUser, query: ProductQuery): Promise<Paginated<ProductDto>> {
+    const includeCost = can(user.role, 'products:view-cost')
+    // Aunque el cajero no vea los números, el orden por margen le revelaría qué productos cuestan más.
+    if (query.sort === 'margin' && !includeCost) {
+      throw new AppError(HttpStatus.FORBIDDEN, 'FORBIDDEN', 'No tenés permiso para ordenar por margen')
+    }
+
     const where = this.whereFor(user, query)
     const [total, products] = await this.prisma.$transaction([
       this.prisma.product.count({ where }),
       this.prisma.product.findMany({
         where,
         include: { category: { select: { id: true, name: true } } },
-        orderBy: ORDER_BY[query.sort],
+        orderBy: orderBy(query.sort, query.dir),
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
       }),
     ])
 
-    const includeCost = can(user.role, 'products:view-cost')
     return { items: products.map((p) => toProductDto(p, includeCost)), total, page: query.page, pageSize: query.pageSize }
   }
 

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { id, isoDate, pagination } from './common'
+import { SORT_DIRECTIONS, id, isoDate, pagination } from './common'
 import type { UserRef } from './common'
 
 export const PAYMENT_METHODS = ['CASH', 'DEBIT', 'CREDIT', 'TRANSFER'] as const
@@ -35,12 +35,20 @@ export type CreateSaleInput = z.infer<typeof createSaleSchema>
 export const SALE_STATUSES = ['COMPLETED', 'VOIDED'] as const
 export type SaleStatus = (typeof SALE_STATUSES)[number]
 
+/** Columnas de la tabla de ventas por las que se puede ordenar. */
+export const SALE_SORTS = ['number', 'date', 'seller', 'items', 'total'] as const
+export type SaleSort = (typeof SALE_SORTS)[number]
+
 export const saleQuerySchema = z
   .object({
     from: isoDate.optional(),
     to: isoDate.optional(),
     status: z.enum([...SALE_STATUSES, 'ALL']).default('ALL'),
+    paymentMethod: z.enum(PAYMENT_METHODS).optional(),
     userId: id.optional(),
+    // Por defecto, las más recientes primero.
+    sort: z.enum(SALE_SORTS).default('date'),
+    dir: z.enum(SORT_DIRECTIONS).default('desc'),
     ...pagination,
   })
   .refine((v) => !v.from || !v.to || v.from <= v.to, { message: 'La fecha inicial es posterior a la final', path: ['from'] })

@@ -50,6 +50,53 @@
   white-space: nowrap;
 }
 
+/* Encabezado ordenable: un botón sin estilo propio, que hereda la tipografía del <th>. */
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sortButton:hover,
+.sorted {
+  color: var(--color-ink);
+}
+
+.sortButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.sortIcon {
+  flex: none;
+  opacity: 0.45;
+}
+
+.sorted .sortIcon,
+.sortButton:hover .sortIcon {
+  opacity: 1;
+}
+
+/* El selector de orden solo aparece en celular (SortSelect): en pantallas anchas se ordena desde los encabezados. */
+.sortSelect {
+  display: none;
+  width: auto;
+}
+
+@media (max-width: 720px) {
+  .sortSelect {
+    display: block;
+  }
+}
+
 .clickable {
   cursor: pointer;
   transition: background-color 100ms;

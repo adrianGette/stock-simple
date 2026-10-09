@@ -1,11 +1,13 @@
 import { Readable } from 'node:stream'
-import { Controller, Get, Header, Param, ParseUUIDPipe, Patch, Post, Query, StreamableFile } from '@nestjs/common'
-import { ApiBearerAuth, ApiProduces, ApiTags } from '@nestjs/swagger'
+import { Body, Controller, Get, Header, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query, StreamableFile } from '@nestjs/common'
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiProduces, ApiTags } from '@nestjs/swagger'
 import {
   type CreateProduct,
   type Paginated,
   type ProductDto,
   type ProductExportQuery,
+  type ProductImportPreviewDto,
+  type ProductImportResultDto,
   type ProductQuery,
   type UpdateProductInput,
   createProductSchema,
@@ -15,15 +17,21 @@ import {
   updateProductSchema,
 } from '@stock/shared'
 import type { RequestUser } from '../auth/auth.types'
+import { AppError } from '../common/app-error'
 import { CurrentUser, RequirePermissions } from '../auth/decorators'
 import { ApiZodBody, ApiZodQuery, ZodBody, ZodQuery } from '../common/zod'
+import { decodeCsv } from './product-import'
+import { ProductImportService } from './product-import.service'
 import { ProductsService } from './products.service'
 
 @ApiTags('products')
 @ApiBearerAuth()
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly products: ProductsService) {}
+  constructor(
+    private readonly products: ProductsService,
+    private readonly imports: ProductImportService,
+  ) {}
 
   @Get()
   @RequirePermissions('products:read')
@@ -54,6 +62,25 @@ export class ProductsController {
     })
   }
 
+  /** Revisa un CSV de productos nuevos y devuelve qué pasaría al importarlo. No guarda nada. */
+  @Post('import/preview')
+  @HttpCode(200)
+  @RequirePermissions('products:write')
+  @ApiConsumes('text/csv')
+  @ApiBody({ schema: { type: 'string', format: 'binary' } })
+  previewImport(@CurrentUser() user: RequestUser, @Body() body: unknown): Promise<ProductImportPreviewDto> {
+    return this.imports.preview(user, csvText(body))
+  }
+
+  /** Importa el CSV si no tiene errores: todos los productos o ninguno. */
+  @Post('import')
+  @RequirePermissions('products:write')
+  @ApiConsumes('text/csv')
+  @ApiBody({ schema: { type: 'string', format: 'binary' } })
+  import(@CurrentUser() user: RequestUser, @Body() body: unknown): Promise<ProductImportResultDto> {
+    return this.imports.import(user, csvText(body))
+  }
+
   @Get(':id')
   @RequirePermissions('products:read')
   get(@CurrentUser() user: RequestUser, @Param('id', ParseUUIDPipe) id: string): Promise<ProductDto> {
@@ -80,4 +107,12 @@ export class ProductsController {
   ): Promise<ProductDto> {
     return this.products.update(user, id, body)
   }
+}
+
+/** El cuerpo llega como bytes crudos solo si el pedido dice `Content-Type: text/csv` (ver setup-app). */
+function csvText(body: unknown): string {
+  if (!Buffer.isBuffer(body)) {
+    throw new AppError(HttpStatus.UNSUPPORTED_MEDIA_TYPE, 'VALIDATION_FAILED', 'Subí un archivo CSV.')
+  }
+  return decodeCsv(body)
 }

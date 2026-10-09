@@ -1,17 +1,23 @@
-import type {
-  CategoryDto,
-  CategoryInput,
-  CreateProductInput,
-  Paginated,
-  PriceChangeDto,
-  ProductDto,
-  ProductQuery,
-  StockAdjustmentInput,
-  StockMovementDto,
-  UpdateProductInput,
+import {
+  type CategoryDto,
+  type CategoryInput,
+  type CreateProductInput,
+  PRODUCT_CSV_HEADERS as H,
+  type Paginated,
+  type PriceChangeDto,
+  type ProductDto,
+  type ProductImportPreviewDto,
+  type ProductImportResultDto,
+  type ProductQuery,
+  type StockAdjustmentInput,
+  type StockMovementDto,
+  type UpdateProductInput,
+  csvHeader,
+  csvMoney,
+  csvRow,
 } from '@stock/shared'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, downloadFile } from '../../lib/api-client'
+import { api, downloadFile, saveFile } from '../../lib/api-client'
 
 export type ProductFilters = Partial<ProductQuery>
 
@@ -116,4 +122,29 @@ export function useDeleteCategory() {
     mutationFn: (id: string) => api<void>(`/categories/${id}`, { method: 'DELETE' }),
     onSuccess: invalidate,
   })
+}
+
+/**
+ * El archivo se manda siempre como text/csv: según el sistema y los programas instalados, el
+ * navegador lo etiqueta distinto (en Windows con Excel, "application/vnd.ms-excel").
+ */
+const asCsv = (file: File) => new Blob([file], { type: 'text/csv' })
+
+export function previewProductImport(file: File) {
+  return api<ProductImportPreviewDto>('/products/import/preview', { method: 'POST', body: asCsv(file) })
+}
+
+export function useImportProducts() {
+  const invalidate = useInvalidateProducts()
+  return useMutation({
+    mutationFn: (file: File) => api<ProductImportResultDto>('/products/import', { method: 'POST', body: asCsv(file) }),
+    onSuccess: invalidate,
+  })
+}
+
+/** Plantilla de importación: mismas columnas que la exportación y una fila de ejemplo. */
+export function downloadImportTemplate() {
+  const header = csvHeader(Object.values(H).map((name) => ({ header: name, value: () => null })))
+  const example = csvRow(['REM-01', '7790001234567', 'Remera negra · M', 'Remeras', csvMoney(2_000_000), csvMoney(3_990_000), 10, 2, true])
+  saveFile(new Blob([header + example], { type: 'text/csv;charset=utf-8' }), 'plantilla-productos.csv')
 }

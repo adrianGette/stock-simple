@@ -55,3 +55,71 @@ export function csvHeader<T>(columns: readonly CsvColumn<T>[]): string {
 export function csvRows<T>(columns: readonly CsvColumn<T>[], rows: readonly T[]): string {
   return rows.map((row) => csvRow(columns.map((column) => column.value(row)))).join('')
 }
+
+export interface CsvRecord {
+  /** Número de fila como lo muestra la planilla: el encabezado es la 1. */
+  row: number
+  cells: string[]
+}
+
+/** `;` (Excel en español) o `,` (Google Sheets, Excel en inglés): el que más aparezca en el encabezado, fuera de comillas. */
+function detectSeparator(text: string): ';' | ',' {
+  let semicolons = 0
+  let commas = 0
+  let quoted = false
+  for (const char of text) {
+    if (char === '"') quoted = !quoted
+    else if (!quoted && (char === '\n' || char === '\r')) break
+    else if (!quoted && char === ';') semicolons++
+    else if (!quoted && char === ',') commas++
+  }
+  return commas > semicolons ? ',' : ';'
+}
+
+/**
+ * Lee un CSV (RFC 4180): celdas entre comillas, comillas escapadas ("") y saltos de línea dentro de
+ * una celda. Ignora el BOM y las filas vacías, pero conserva la numeración original para que los
+ * errores digan la misma fila que muestra la planilla.
+ */
+export function parseCsv(text: string): CsvRecord[] {
+  const input = text.startsWith(CSV_BOM) ? text.slice(1) : text
+  const separator = detectSeparator(input)
+  const records: CsvRecord[] = []
+  let cells: string[] = []
+  let cell = ''
+  let quoted = false
+  let row = 1
+
+  const endRecord = () => {
+    cells.push(cell)
+    if (cells.some((value) => value.trim() !== '')) records.push({ row, cells })
+    cells = []
+    cell = ''
+    row++
+  }
+
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i]
+    if (quoted) {
+      if (char !== '"') cell += char
+      else if (input[i + 1] === '"') {
+        cell += '"'
+        i++
+      } else quoted = false
+    } else if (char === '"' && cell === '') quoted = true
+    else if (char === separator) {
+      cells.push(cell)
+      cell = ''
+    } else if (char === '\n' || char === '\r') {
+      if (char === '\r' && input[i + 1] === '\n') i++
+      endRecord()
+    } else cell += char
+  }
+  if (cell !== '' || cells.length > 0) endRecord()
+  return records
+}
+
+/** Deshace el apóstrofo que `csvCell` agrega a los textos que la planilla ejecutaría como fórmula. */
+export function csvUnescape(value: string): string {
+  return /^'[=+\-@\t\r]/.test(value) ? value.slice(1) : value
+}
