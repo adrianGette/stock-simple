@@ -9,16 +9,19 @@ interface PageHeaderProps {
   title: string
   eyebrow?: ReactNode
   subtitle?: ReactNode
+  /** Datos del registro debajo del título (no va dentro del párrafo del subtítulo: puede tener listas y botones). */
+  meta?: ReactNode
   actions?: ReactNode
 }
 
-export function PageHeader({ title, eyebrow, subtitle, actions }: PageHeaderProps) {
+export function PageHeader({ title, eyebrow, subtitle, meta, actions }: PageHeaderProps) {
   return (
     <header className={styles.header}>
-      <div>
+      <div className={styles.heading}>
         {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
         <h1 className={styles.title}>{title}</h1>
         {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        {meta && <div className={styles.meta}>{meta}</div>}
       </div>
       {actions && <div className={styles.actions}>{actions}</div>}
     </header>

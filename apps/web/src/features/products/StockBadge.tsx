@@ -1,6 +1,10 @@
 import { Badge } from '../../shared/ui/Badge'
 
-export function StockBadge({ stock, minStock }: { stock: number; minStock: number }) {
+/**
+ * En las tablas la columna ya dice "Stock" y solo se marcan los problemas. Fuera de ellas (`verbose`)
+ * la etiqueta se aclara y también se muestra cuando está todo bien.
+ */
+export function StockBadge({ stock, minStock, verbose = false }: { stock: number; minStock: number; verbose?: boolean }) {
   if (stock <= 0)
     return (
       <Badge tone="danger" icon="x">
@@ -10,8 +14,12 @@ export function StockBadge({ stock, minStock }: { stock: number; minStock: numbe
   if (stock <= minStock)
     return (
       <Badge tone="warning" icon="alert">
-        Bajo
+        {verbose ? 'Stock bajo' : 'Bajo'}
       </Badge>
     )
-  return null
+  return verbose ? (
+    <Badge tone="success" icon="check">
+      Disponible
+    </Badge>
+  ) : null
 }
