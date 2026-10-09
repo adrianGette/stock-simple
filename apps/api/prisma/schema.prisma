@@ -131,6 +131,12 @@ model Product {
   /// Stock actual. Es un caché del libro de movimientos y se actualiza en la misma transacción.
   stock      Int      @default(0)
   minStock   Int      @default(0) @map("min_stock")
+  /// Margen sobre el precio de venta como fracción (0.4 = 40 %); null si el precio es 0.
+  /// Columna generada por Postgres a partir de precio y costo (ver la migración): existe para
+  /// poder ordenar el listado por margen en la base. Nunca se escribe desde la app.
+  /// El dbgenerated replica la expresión tal como la guarda Postgres: si difiere, `migrate dev`
+  /// propondría un DROP DEFAULT que rompe la columna.
+  marginRatio Float? @default(dbgenerated("\nCASE\n    WHEN (price_cents > 0) THEN (((price_cents - cost_cents))::double precision / (price_cents)::double precision)\n    ELSE NULL::double precision\nEND")) @map("margin_ratio")
   active     Boolean  @default(true)
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
