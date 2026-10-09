@@ -1,6 +1,6 @@
-import { BUSINESS_TIMEZONE, formatMoney } from '@stock/shared'
+import { BUSINESS_TIMEZONE, formatMoney, parsePesos } from '@stock/shared'
 
-export { formatMoney }
+export { formatMoney, parsePesos }
 
 const dateTime = new Intl.DateTimeFormat('es-AR', {
   timeZone: BUSINESS_TIMEZONE,
@@ -27,19 +27,6 @@ export const formatPercent = (n: number) => `${percent.format(n)} %`
 /** $ 1,2 M — para ejes y valores que no necesitan centavos. */
 export const formatMoneyCompact = (cents: number) => `$ ${compact.format(cents / 100)}`
 
-/** Interpreta lo que escribe el usuario en pesos ("1.250,50", "1250.5") y devuelve centavos. */
-export function parsePesos(input: string): number | null {
-  const cleaned = input.replace(/[$\s]/g, '')
-  if (!cleaned) return null
-  // Formato argentino: punto de miles y coma decimal. Si solo hay punto con 1-2 decimales, es decimal.
-  const normalized = cleaned.includes(',')
-    ? cleaned.replace(/\./g, '').replace(',', '.')
-    : /^\d+\.\d{1,2}$/.test(cleaned)
-      ? cleaned
-      : cleaned.replace(/\./g, '')
-  if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return null
-  return Math.round(Number(normalized) * 100)
-}
 
 /** Centavos a texto editable: 125050 → "1250,50", 125000 → "1250". */
 export function centsToInput(cents: number): string {

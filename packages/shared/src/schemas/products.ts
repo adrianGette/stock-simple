@@ -59,6 +59,51 @@ export type ProductQuery = z.infer<typeof productQuerySchema>
 export const productExportQuerySchema = productQuerySchema.omit({ sort: true, dir: true, page: true, pageSize: true })
 export type ProductExportQuery = z.infer<typeof productExportQuerySchema>
 
+/**
+ * Encabezados del CSV de productos. Los usan la exportación, la plantilla y la importación: un archivo
+ * exportado se puede editar en la planilla y volver a subir.
+ */
+export const PRODUCT_CSV_HEADERS = {
+  sku: 'SKU',
+  barcode: 'Código de barras',
+  name: 'Nombre',
+  category: 'Categoría',
+  cost: 'Costo',
+  price: 'Precio',
+  stock: 'Stock',
+  minStock: 'Stock mínimo',
+  active: 'Activo',
+} as const
+export type ProductCsvField = keyof typeof PRODUCT_CSV_HEADERS
+
+/** Límites de un archivo de importación: alcanzan para cualquier catálogo chico y no dejan tumbar el servidor. */
+export const PRODUCT_IMPORT_MAX_BYTES = 2 * 1024 * 1024
+export const PRODUCT_IMPORT_MAX_ROWS = 5_000
+
+export interface ProductImportError {
+  /** Fila de la planilla (el encabezado es la 1); null si el problema es del archivo entero. */
+  row: number | null
+  message: string
+}
+
+/** Resultado de revisar un archivo antes de importarlo. No guarda nada. */
+export interface ProductImportPreviewDto {
+  /** Filas con datos (sin contar el encabezado). */
+  rows: number
+  /** Productos que se crearían si no hubiera errores. */
+  toCreate: number
+  /** Categorías que no existen y se crearían. */
+  newCategories: string[]
+  /** Errores por fila, hasta un máximo; `errorCount` dice cuántos hay en total. */
+  errors: ProductImportError[]
+  errorCount: number
+}
+
+export interface ProductImportResultDto {
+  created: number
+  newCategories: string[]
+}
+
 export interface ProductDto {
   id: string
   sku: string

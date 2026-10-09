@@ -16,6 +16,7 @@ import { type SortOption, SortSelect } from '../../shared/ui/SortSelect'
 import table from '../../shared/ui/table.module.css'
 import { useCurrentUser } from '../auth/AuthProvider'
 import { CategoriesDialog } from './CategoriesDialog'
+import { ImportProductsDialog } from './ImportProductsDialog'
 import { ProductFormDialog } from './ProductFormDialog'
 import { StockBadge } from './StockBadge'
 import { type ProductFilters, exportProducts, useCategories, useProducts } from './api'
@@ -50,6 +51,7 @@ export function ProductsPage() {
   const canSeeCost = user.can('products:view-cost')
   const [creating, setCreating] = useState(false)
   const [managingCategories, setManagingCategories] = useState(false)
+  const [importing, setImporting] = useState(false)
 
   const [params, update] = useQueryParams()
   const [search, setSearch] = useState(params.get('q') ?? '')
@@ -92,6 +94,9 @@ export function ProductsPage() {
             </Button>
             {canWrite && (
               <>
+                <Button icon="upload" onClick={() => setImporting(true)}>
+                  Importar
+                </Button>
                 <Button icon="layers" onClick={() => setManagingCategories(true)}>
                   Categorías
                 </Button>
@@ -200,6 +205,7 @@ export function ProductsPage() {
 
       <ProductFormDialog open={creating} onClose={() => setCreating(false)} onSaved={(p) => navigate(`/productos/${p.id}`)} />
       <CategoriesDialog open={managingCategories} onClose={() => setManagingCategories(false)} />
+      <ImportProductsDialog open={importing} onClose={() => setImporting(false)} />
     </Page>
   )
 }
