@@ -9,11 +9,15 @@
 # La web llama a /api en su mismo origen y Netlify lo reenvía a la API:
 # la cookie de sesión queda first-party (ver docs/adr/0004).
 # Reemplazá la URL por la de tu servicio en Render.
+# signed: Netlify firma cada pedido con el secreto de la variable PROXY_SIGNATURE_SECRET (encabezado
+# x-nf-sign) y la API rechaza los que no vienen firmados. Así nadie le pega directo a Render salteando
+# el proxy (ver SECURITY.md y docs/DEPLOY.md).
 [[redirects]]
   from = "/api/*"
   to = "https://stock-simple-api.onrender.com/api/:splat"
   status = 200
   force = true
+  signed = "PROXY_SIGNATURE_SECRET"
 
 # SPA: cualquier otra ruta la resuelve React Router.
 [[redirects]]

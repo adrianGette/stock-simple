@@ -5,3 +5,5 @@ process.env.JWT_ACCESS_SECRET = 'test-secret-test-secret-test-secret-123'
 process.env.WEB_ORIGIN = 'http://localhost:5173'
 // Cada archivo arranca sin modo demo; demo-mode.e2e-spec.ts lo activa solo para sí.
 process.env.DEMO_MODE = 'false'
+// Solo proxy-signature.e2e-spec.ts exige la firma de Netlify.
+delete process.env.PROXY_SIGNATURE_SECRET

@@ -66,6 +66,19 @@ describe('Auth', () => {
     expect(res.body.code).toBe('UNAUTHORIZED')
   })
 
+  it('bloquea la cuenta tras 10 intentos fallidos, aunque después llegue la contraseña correcta', async () => {
+    for (let i = 0; i < 10; i++) {
+      await http().post('/api/auth/login').send({ email, password: 'adivinando' }).expect(401)
+    }
+    const locked = await http().post('/api/auth/login').send({ email, password: PASSWORD }).expect(429)
+    expect(locked.body.code).toBe('TOO_MANY_REQUESTS')
+
+    // El bloqueo es solo de esa cuenta.
+    const other = await createFixture(app, prisma, 'Otro comercio')
+    const otherEmail = (await prisma.user.findUniqueOrThrow({ where: { id: other.userIds.OWNER } })).email
+    await http().post('/api/auth/login').send({ email: otherEmail, password: PASSWORD }).expect(200)
+  })
+
   it('un usuario desactivado pierde el acceso al instante', async () => {
     const token = (await http().post('/api/auth/login').send({ email, password: PASSWORD })).body.accessToken
     await prisma.user.update({ where: { email }, data: { active: false } })

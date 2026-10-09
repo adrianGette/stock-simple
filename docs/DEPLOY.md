@@ -76,6 +76,13 @@ Si el nombre `stock-simple-api` ya estaba tomado, Render te asigna otra URL: ano
 2. Creá una cuenta en [netlify.com](https://netlify.com) con tu GitHub → **Add new site → Import an existing project** → elegí el repositorio. Netlify lee `netlify.toml`: no hay que configurar nada más.
 3. En **Site configuration → Change site name** elegí un nombre, por ejemplo `stock-simple` (la URL queda `https://stock-simple.netlify.app`).
 4. Volvé a Render y verificá que `WEB_ORIGIN` sea exactamente esa URL (sin barra final).
+5. **Proxy firmado**: hace que la API solo acepte pedidos que pasan por Netlify. Sin esto, cualquiera puede pegarle directo a Render con una IP inventada y saltearse el límite de intentos de login.
+   1. Generá un secreto en tu terminal: `openssl rand -base64 48`. No lo pegues en ningún archivo del repo.
+   2. Netlify: **Site configuration → Environment variables → Add a variable**. Nombre `PROXY_SIGNATURE_SECRET`, el valor generado, y que el alcance (*scopes*) incluya **Runtime**. Desde ahí Netlify firma cada pedido a `/api` (lo indica `signed` en `netlify.toml`).
+   3. Recién después, Render: **Environment → Add environment variable** con el mismo nombre y valor. Render vuelve a deployar y la API empieza a exigir la firma.
+   4. Probá: la web tiene que funcionar igual, y `https://TU-API.onrender.com/api/products` tiene que responder `403` con "Acceso directo no permitido". El health check y `/api/docs` siguen abiertos.
+
+   El orden importa: si la API exige la firma antes de que Netlify la mande, la web deja de funcionar hasta que cargues la variable en Netlify y vuelvas a deployar.
 
 ## 5. Probar
 
@@ -109,7 +116,8 @@ Configuración (una sola vez):
 | El deploy de Render falla en `prisma` o `nest` | El build tiene que instalar las devDependencies: verificá que el build command tenga `npm ci --include=dev`. |
 | `Variables de entorno inválidas` en el log de Render | Falta `DATABASE_URL` o `WEB_ORIGIN`, o tienen un formato inválido. |
 | Login correcto, pero al recargar te saca | `WEB_ORIGIN` no coincide con la URL de Netlify, o el proxy de `netlify.toml` apunta a otra URL. |
-| `Demasiados intentos` | El rate limit de login es de 5 por minuto por IP. Si aparece con poco uso, revisá `TRUST_PROXY_HOPS=2`. |
+| `Demasiados intentos` | El rate limit de login es de 5 por minuto por IP, y 10 intentos fallidos cada 15 minutos por cuenta (este último no aplica con `DEMO_MODE=true`). Si aparece con poco uso, revisá `TRUST_PROXY_HOPS=2`. |
+| Toda la web responde "Acceso directo no permitido" | Render tiene `PROXY_SIGNATURE_SECRET` pero Netlify no manda la firma: la variable falta en Netlify, tiene otro valor o su alcance no incluye **Runtime**. Corregila y volvé a deployar la web. |
 | El sitio muestra "Site not available" | Se terminó la cuota gratuita del mes de Netlify (ver "Mantenerlo gratis"). Vuelve el mes siguiente. |
 
 ## Mantenerlo gratis

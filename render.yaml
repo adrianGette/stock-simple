@@ -32,6 +32,10 @@ services:
         value: lax
       - key: TRUST_PROXY_HOPS
         value: "2"
+      # Mismo valor que la variable PROXY_SIGNATURE_SECRET de Netlify: la API solo acepta pedidos firmados
+      # por el proxy (ver docs/DEPLOY.md). Se carga a mano en los dos servicios.
+      - key: PROXY_SIGNATURE_SECRET
+        sync: false
       # Demo pública: las cuentas de prueba no se pueden modificar (ver SECURITY.md).
       - key: DEMO_MODE
         value: "true"

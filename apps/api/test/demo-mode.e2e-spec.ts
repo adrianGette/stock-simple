@@ -66,6 +66,14 @@ describe('Modo demo (cuentas compartidas)', () => {
     expect((await http().delete('/api/users/me/photo').set(auth(shop.tokens.CASHIER))).status).toBe(403)
   })
 
+  it('no bloquea cuentas por intentos fallidos: con la contraseña pública, solo dejaría sin demo a todos', async () => {
+    const email = (await prisma.user.findUniqueOrThrow({ where: { id: shop.userIds.OWNER } })).email
+    for (let i = 0; i < 12; i++) {
+      await http().post('/api/auth/login').send({ email, password: 'saboteando' }).expect(401)
+    }
+    expect(await login(app, email, PASSWORD)).toEqual(expect.any(String))
+  })
+
   it('el resto de la app funciona normal: se puede vender', async () => {
     const productId = await shop.product({ stock: 3 })
     const res = await http()

@@ -30,6 +30,15 @@ describe('Stock y precios', () => {
     expect(dup.body.code).toBe('SKU_TAKEN')
   })
 
+  it('busca por código exacto y valida el parámetro', async () => {
+    const productId = await shop.product()
+    const found = await http().get('/api/products/lookup').query({ code: ' sku-1 ' }).set(auth(shop.tokens.CASHIER)).expect(200)
+    expect(found.body.id).toBe(productId)
+    // Un parámetro repetido llega como lista: se rechaza en lugar de romper con un error 500.
+    const repeated = await http().get('/api/products/lookup?code=SKU-1&code=SKU-2').set(auth(shop.tokens.CASHIER)).expect(400)
+    expect(repeated.body.code).toBe('VALIDATION_FAILED')
+  })
+
   it('el recuento calcula la diferencia contra el stock del sistema', async () => {
     const id = await shop.product({ stock: 10 })
     const res = await adjust(id, { type: 'COUNT', countedStock: 7, note: 'Inventario mensual' }).expect(201)
