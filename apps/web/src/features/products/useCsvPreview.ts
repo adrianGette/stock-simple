@@ -1,5 +1,5 @@
 import { PRODUCT_IMPORT_MAX_BYTES } from '@stock/shared'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { ApiError, errorMessage } from '../../lib/api-client'
 
 const MAX_MB = Math.round(PRODUCT_IMPORT_MAX_BYTES / 1024 / 1024)
@@ -10,7 +10,6 @@ const MAX_MB = Math.round(PRODUCT_IMPORT_MAX_BYTES / 1024 / 1024)
  * `confirm` aplica el archivo y, si la API lo rechaza por errores, muestra la revisión nueva.
  */
 export function useCsvPreview<P>(requestPreview: (file: File) => Promise<P>) {
-  const inputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<P | null>(null)
   const [checking, setChecking] = useState(false)
@@ -23,7 +22,6 @@ export function useCsvPreview<P>(requestPreview: (file: File) => Promise<P>) {
   }
 
   async function check(selected: File | undefined) {
-    if (inputRef.current) inputRef.current.value = '' // permite volver a elegir el mismo archivo después de corregirlo
     if (!selected) return
     setFile(selected)
     setPreview(null)
@@ -52,5 +50,5 @@ export function useCsvPreview<P>(requestPreview: (file: File) => Promise<P>) {
     }
   }
 
-  return { inputRef, file, preview, checking, problem, check, confirm, reset }
+  return { file, preview, checking, problem, check, confirm, reset }
 }

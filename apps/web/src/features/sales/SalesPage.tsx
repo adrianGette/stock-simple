@@ -79,7 +79,7 @@ export function SalesPage() {
         <Select
           aria-label="Período"
           value={preset}
-          onChange={(event) => update({ periodo: event.target.value === DEFAULT_PRESET ? null : event.target.value })}
+          onValueChange={(value) => update({ periodo: value === DEFAULT_PRESET ? null : value })}
           style={{ width: 'auto' }}
         >
           {RANGE_PRESETS.map((option) => (
@@ -91,7 +91,7 @@ export function SalesPage() {
         <Select
           aria-label="Medio de pago"
           value={paymentMethod ?? ''}
-          onChange={(event) => update({ pago: event.target.value || null })}
+          onValueChange={(value) => update({ pago: value || null })}
           style={{ width: 'auto' }}
         >
           <option value="">Todos los medios de pago</option>

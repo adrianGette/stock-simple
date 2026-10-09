@@ -2,8 +2,10 @@ import { PRODUCT_CSV_HEADERS, type ProductImportChange, type ProductImportPrevie
 import { formatInteger, formatMoney } from '../../lib/format'
 import { Button } from '../../shared/ui/Button'
 import { Dialog } from '../../shared/ui/Dialog'
+import { FileDropzone } from '../../shared/ui/FileDropzone'
 import { LoadingState } from '../../shared/ui/Feedback'
 import { Icon } from '../../shared/ui/Icon'
+import { Steps } from '../../shared/ui/Steps'
 import { useToast } from '../../shared/ui/Toast'
 import table from '../../shared/ui/table.module.css'
 import { downloadImportTemplate, previewProductImport, useImportProducts } from './api'
@@ -35,7 +37,7 @@ function saveLabel({ toCreate, toUpdate }: ProductImportPreviewDto): string {
 export function ImportProductsDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const toast = useToast()
   const importing = useImportProducts()
-  const { inputRef, file, preview, checking, problem, check, confirm: apply, reset } = useCsvPreview(previewProductImport)
+  const { file, preview, checking, problem, check, confirm: apply, reset } = useCsvPreview(previewProductImport)
 
   function close() {
     reset()
@@ -61,6 +63,7 @@ export function ImportProductsDialog({ open, onClose }: { open: boolean; onClose
   return (
     <Dialog
       open={open}
+      icon="upload"
       onClose={close}
       wide
       dismissible={!importing.isPending}
@@ -78,37 +81,29 @@ export function ImportProductsDialog({ open, onClose }: { open: boolean; onClose
       }
     >
       <div className={styles.importBody}>
-        <ol className={styles.importSteps}>
-          <li>Descargá la plantilla, o exportá tus productos para editarlos: tienen las mismas columnas.</li>
-          <li>
-            Completala en Excel, Google Sheets o LibreOffice y guardala como CSV. Si usás Excel, formateá la columna Código de
-            barras como texto.
-          </li>
-          <li>
-            Subila: antes de guardar nada te mostramos qué va a pasar. El SKU identifica cada producto: si ya existe se
-            actualiza (menos el stock, que se corrige con un conteo) y si no, se crea. Una celda vacía borra ese dato.
-          </li>
-        </ol>
+        <Steps>
+          {[
+            'Descargá la plantilla, o exportá tus productos para editarlos: tienen las mismas columnas.',
+            'Completala en Excel, Google Sheets o LibreOffice y guardala como CSV. Si usás Excel, formateá la columna Código de barras como texto.',
+            'Subila: antes de guardar nada te mostramos qué va a pasar. El SKU identifica cada producto: si ya existe se actualiza (menos el stock, que se corrige con un conteo) y si no, se crea. Una celda vacía borra ese dato.',
+          ]}
+        </Steps>
 
-        <div className={styles.importActions}>
-          <Button icon="download" onClick={downloadImportTemplate}>
+        <div className={styles.importTemplate}>
+          <span>¿Primera vez? Empezá desde la plantilla.</span>
+          <Button size="sm" variant="ghost" icon="download" onClick={downloadImportTemplate}>
             Descargar plantilla
           </Button>
-          <Button icon="plus" onClick={() => inputRef.current?.click()} disabled={checking || importing.isPending}>
-            {file ? 'Elegir otro archivo' : 'Elegir archivo CSV'}
-          </Button>
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".csv,text/csv"
-            className="visually-hidden"
-            tabIndex={-1}
-            aria-hidden
-            onChange={(event) => check(event.target.files?.[0])}
-          />
         </div>
 
-        {file && <p className={styles.importFile}>Archivo: {file.name}</p>}
+        <FileDropzone
+          accept=".csv,text/csv"
+          title="Arrastrá tu archivo CSV o hacé clic para elegirlo"
+          hint="Hasta 2 MB y 5.000 productos"
+          fileName={file?.name}
+          disabled={checking || importing.isPending}
+          onFile={check}
+        />
 
         {checking && <LoadingState label="Revisando el archivo…" />}
 

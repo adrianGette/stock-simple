@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ROLE_LABELS, ROLES, type UserDto, createUserSchema } from '@stock/shared'
-import { useForm, useWatch } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { ApiError, errorMessage } from '../../lib/api-client'
 import { Button } from '../../shared/ui/Button'
@@ -36,7 +36,13 @@ interface UserFormDialogProps {
 
 export function UserFormDialog({ open, onClose, user, isSelf = false }: UserFormDialogProps) {
   return (
-    <Dialog open={open} onClose={onClose} title={user ? `Editar a ${user.name}` : 'Nuevo usuario'}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={user ? `Editar a ${user.name}` : 'Nuevo usuario'}
+      description={user ? user.email : 'Va a poder ingresar con su email y la contraseña que le des'}
+      icon="users"
+    >
       {open && (user ? <EditForm user={user} isSelf={isSelf} onDone={onClose} /> : <CreateForm onDone={onClose} />)}
     </Dialog>
   )
@@ -76,13 +82,21 @@ function CreateForm({ onDone }: { onDone: () => void }) {
         <Input type="password" autoComplete="new-password" {...form.register('password')} />
       </Field>
       <Field label="Rol" hint={ROLE_HINTS[role]} error={errors.role?.message} className={styles.full}>
-        <Select {...form.register('role')}>
-          {ROLES.map((r) => (
-            <option key={r} value={r}>
-              {ROLE_LABELS[r]}
-            </option>
-          ))}
-        </Select>
+        {(controlProps) => (
+          <Controller
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <Select {...controlProps} value={field.value} onValueChange={field.onChange} onBlur={field.onBlur}>
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {ROLE_LABELS[r]}
+                  </option>
+                ))}
+              </Select>
+            )}
+          />
+        )}
       </Field>
       {errors.root && (
         <p className={`${styles.full} ${styles.formError}`} role="alert">
@@ -138,13 +152,21 @@ function EditForm({ user, isSelf, onDone }: { user: UserDto; isSelf: boolean; on
         error={errors.role?.message}
         className={styles.full}
       >
-        <Select disabled={isSelf} {...form.register('role')}>
-          {ROLES.map((r) => (
-            <option key={r} value={r}>
-              {ROLE_LABELS[r]}
-            </option>
-          ))}
-        </Select>
+        {(controlProps) => (
+          <Controller
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <Select {...controlProps} disabled={isSelf} value={field.value} onValueChange={field.onChange} onBlur={field.onBlur}>
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {ROLE_LABELS[r]}
+                  </option>
+                ))}
+              </Select>
+            )}
+          />
+        )}
       </Field>
       <Field label="Nueva contraseña" optional hint="Dejala vacía para no cambiarla. Cierra sus sesiones abiertas." error={errors.password?.message} className={styles.full}>
         <Input type="password" autoComplete="new-password" {...form.register('password')} />

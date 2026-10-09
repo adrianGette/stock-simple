@@ -6,16 +6,15 @@
   text-align: center;
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-2);
+
+
+.remove {
+  color: var(--color-danger);
 }
 
-.hint {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
+.remove:hover:not(:disabled) {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 .note {

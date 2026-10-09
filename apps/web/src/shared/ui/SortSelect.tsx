@@ -25,8 +25,8 @@ export function SortSelect<S extends string>({ options, sort, dir, onSort }: Sor
       aria-label="Ordenar por"
       className={table.sortSelect}
       value={`${sort}:${dir}`}
-      onChange={(event) => {
-        const [nextSort, nextDir] = event.target.value.split(':') as [S, SortDirection]
+      onValueChange={(value) => {
+        const [nextSort, nextDir] = value.split(':') as [S, SortDirection]
         onSort(nextSort, nextDir)
       }}
     >

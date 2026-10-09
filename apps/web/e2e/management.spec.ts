@@ -5,7 +5,8 @@ test('el encargado aplica un aumento masivo con vista previa', async ({ page }) 
   await loginAs(page, 'Encargado')
   await page.goto('/precios')
 
-  await page.getByLabel('Productos').selectOption({ label: 'Accesorios (8)' })
+  await page.getByRole('button', { name: 'Productos' }).click()
+  await page.getByRole('option', { name: 'Accesorios (8)' }).click()
   await page.getByLabel('Porcentaje').fill('10')
   // Ejemplo de la pantalla: $34.900 + 10 % = $38.390
   await expect(page.getByText('Ejemplo: un producto de')).toContainText('$ 38.390,00')

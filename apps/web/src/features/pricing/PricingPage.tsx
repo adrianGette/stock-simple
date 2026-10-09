@@ -120,7 +120,7 @@ export function PricingPage() {
             }}
           >
             <Field label="Productos">
-              <Select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
+              <Select value={categoryId} onValueChange={setCategoryId}>
                 <option value="">Todas las categorías</option>
                 {categories.data?.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -146,7 +146,7 @@ export function PricingPage() {
             {target !== 'cost' && (
               <>
                 <Field label="Redondeo del precio">
-                  <Select value={roundTo} onChange={(event) => setRoundTo(Number(event.target.value) as RoundingStep)}>
+                  <Select value={String(roundTo)} onValueChange={(value) => setRoundTo(Number(value) as RoundingStep)}>
                     {ROUNDING_STEPS.map((step) => (
                       <option key={step} value={step}>
                         {ROUNDING_LABELS[step]}
@@ -269,6 +269,7 @@ export function PricingPage() {
         open={confirming}
         onClose={() => setConfirming(false)}
         title="¿Aplicar la actualización?"
+        icon="tag"
         description={`Se modificará ${target === 'price' ? 'el precio' : target === 'cost' ? 'el costo' : 'el precio y el costo'} de ${selectedIds.length} productos (${percent > 0 ? '+' : ''}${formatPercent(percent)}). Queda registrado en el historial de cada producto.`}
         dismissible={!apply.isPending}
         footer={

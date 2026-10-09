@@ -1,11 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { api, errorMessage, refreshSession } from '../../lib/api-client'
 import { blobToDataUrl } from '../../shared/lib/blob-to-data-url'
 import { toSquarePhoto } from '../../shared/lib/resize-image'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Button } from '../../shared/ui/Button'
 import { Dialog } from '../../shared/ui/Dialog'
+import { FileDropzone } from '../../shared/ui/FileDropzone'
 import { Icon } from '../../shared/ui/Icon'
 import { useToast } from '../../shared/ui/Toast'
 import { useCurrentUser } from '../auth/AuthProvider'
@@ -16,7 +17,6 @@ export function ProfilePhotoDialog({ open, onClose }: { open: boolean; onClose: 
   const me = useCurrentUser()
   const toast = useToast()
   const queryClient = useQueryClient()
-  const inputRef = useRef<HTMLInputElement>(null)
   const [photo, setPhoto] = useState<Blob | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [problem, setProblem] = useState<string | null>(null)
@@ -29,9 +29,7 @@ export function ProfilePhotoDialog({ open, onClose }: { open: boolean; onClose: 
     onClose()
   }
 
-  async function choose(file: File | undefined) {
-    if (inputRef.current) inputRef.current.value = ''
-    if (!file) return
+  async function choose(file: File) {
     setProblem(null)
     try {
       const prepared = await toSquarePhoto(file)
@@ -63,6 +61,7 @@ export function ProfilePhotoDialog({ open, onClose }: { open: boolean; onClose: 
       open={open}
       onClose={close}
       dismissible={!saving}
+      icon="camera"
       title="Foto de perfil"
       description="Se ve en tu tarjeta, en Equipo y en las ventas que registrás."
       footer={
@@ -91,31 +90,26 @@ export function ProfilePhotoDialog({ open, onClose }: { open: boolean; onClose: 
           </p>
         ) : (
           <>
-            <div className={styles.actions}>
-              <Button icon="upload" onClick={() => inputRef.current?.click()} disabled={saving}>
-                {me.photoVersion || photo ? 'Elegir otra foto' : 'Elegir foto'}
-              </Button>
-              {me.photoVersion && !photo && (
-                <Button
-                  variant="ghost"
-                  icon="trash"
-                  loading={saving}
-                  onClick={() => save(() => api('/users/me/photo', { method: 'DELETE' }), 'Foto quitada')}
-                >
-                  Quitar foto
-                </Button>
-              )}
-            </div>
-            <p className={styles.hint}>La recortamos en cuadrado y la achicamos antes de subirla.</p>
-            <input
-              ref={inputRef}
-              type="file"
+            <FileDropzone
               accept="image/*"
-              className="visually-hidden"
-              tabIndex={-1}
-              aria-hidden
-              onChange={(event) => choose(event.target.files?.[0])}
+              icon="camera"
+              title={me.photoVersion || photo ? 'Arrastrá otra foto o hacé clic para elegirla' : 'Arrastrá una foto o hacé clic para elegirla'}
+              hint="La recortamos en cuadrado y la achicamos antes de subirla"
+              disabled={saving}
+              onFile={choose}
             />
+            {me.photoVersion && !photo && (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon="trash"
+                className={styles.remove}
+                loading={saving}
+                onClick={() => save(() => api('/users/me/photo', { method: 'DELETE' }), 'Foto quitada')}
+              >
+                Quitar foto
+              </Button>
+            )}
           </>
         )}
         {problem && (

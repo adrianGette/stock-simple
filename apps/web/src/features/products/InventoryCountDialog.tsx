@@ -2,8 +2,10 @@ import { formatInteger } from '../../lib/format'
 import { useDownload } from '../../shared/hooks/useDownload'
 import { Button } from '../../shared/ui/Button'
 import { Dialog } from '../../shared/ui/Dialog'
+import { FileDropzone } from '../../shared/ui/FileDropzone'
 import { LoadingState } from '../../shared/ui/Feedback'
 import { Icon } from '../../shared/ui/Icon'
+import { Steps } from '../../shared/ui/Steps'
 import { useToast } from '../../shared/ui/Toast'
 import table from '../../shared/ui/table.module.css'
 import { type ProductFilters, downloadCountSheet, previewInventoryCount, useApplyInventoryCount } from './api'
@@ -32,7 +34,7 @@ export function InventoryCountDialog({ open, onClose, filters, filtersLabel }: I
   const toast = useToast()
   const applying = useApplyInventoryCount()
   const sheet = useDownload()
-  const { inputRef, file, preview, checking, problem, check, confirm: apply, reset } = useCsvPreview(previewInventoryCount)
+  const { file, preview, checking, problem, check, confirm: apply, reset } = useCsvPreview(previewInventoryCount)
 
   function close() {
     reset()
@@ -52,6 +54,7 @@ export function InventoryCountDialog({ open, onClose, filters, filtersLabel }: I
   return (
     <Dialog
       open={open}
+      icon="clipboardCheck"
       onClose={close}
       wide
       dismissible={!applying.isPending}
@@ -69,34 +72,31 @@ export function InventoryCountDialog({ open, onClose, filters, filtersLabel }: I
       }
     >
       <div className={styles.importBody}>
-        <ol className={styles.importSteps}>
-          <li>
-            Descargá la planilla: trae el stock que tiene hoy el sistema.
-            {filtersLabel ? ` Solo los productos que estás viendo (${filtersLabel}).` : ' Para contar por partes, filtrá antes por categoría.'}
-          </li>
-          <li>Contá la mercadería y anotá cada cantidad en la columna Contado. Lo que no cuentes, dejalo vacío.</li>
-          <li>Subila: te mostramos las diferencias antes de ajustar nada. Cada diferencia queda en el historial como conteo.</li>
-        </ol>
+        <Steps>
+          {[
+            `Descargá la planilla: trae el stock que tiene hoy el sistema.${filtersLabel ? ` Solo los productos que estás viendo (${filtersLabel}).` : ' Para contar por partes, filtrá antes por categoría.'}`,
+            'Contá la mercadería y anotá cada cantidad en la columna Contado. Lo que no cuentes, dejalo vacío.',
+            'Subila: te mostramos las diferencias antes de ajustar nada. Cada diferencia queda en el historial como conteo.',
+          ]}
+        </Steps>
 
-        <div className={styles.importActions}>
-          <Button icon="download" loading={sheet.downloading} onClick={() => sheet.download(() => downloadCountSheet(filters))}>
+        <div className={styles.importTemplate}>
+          <span>{filtersLabel ? `Planilla con los productos que estás viendo (${filtersLabel}).` : 'Planilla con todo el catálogo.'}</span>
+          <Button size="sm" variant="ghost" icon="download" loading={sheet.downloading} onClick={() => sheet.download(() => downloadCountSheet(filters))}>
             Descargar planilla
           </Button>
-          <Button icon="upload" onClick={() => inputRef.current?.click()} disabled={checking || applying.isPending}>
-            {file ? 'Elegir otra planilla' : 'Subir planilla completada'}
-          </Button>
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".csv,text/csv"
-            className="visually-hidden"
-            tabIndex={-1}
-            aria-hidden
-            onChange={(event) => check(event.target.files?.[0])}
-          />
         </div>
 
-        {file && <p className={styles.importFile}>Archivo: {file.name}</p>}
+        <FileDropzone
+          accept=".csv,text/csv"
+          icon="clipboardCheck"
+          title="Arrastrá la planilla completada o hacé clic para elegirla"
+          hint="El mismo archivo que descargaste, con la columna Contado"
+          fileName={file?.name}
+          disabled={checking || applying.isPending}
+          onFile={check}
+        />
+
         {checking && <LoadingState label="Revisando la planilla…" />}
         {problem && (
           <p className={styles.formError} role="alert">
