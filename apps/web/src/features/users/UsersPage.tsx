@@ -1,9 +1,10 @@
 import { ROLE_LABELS, type SortDirection, type UserDto } from '@stock/shared'
 import { useMemo, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
+import { Avatar } from '../../shared/ui/Avatar'
 import { Badge } from '../../shared/ui/Badge'
 import { Button } from '../../shared/ui/Button'
-import { ErrorState, LoadingState } from '../../shared/ui/Feedback'
+import { ErrorState, TableSkeleton } from '../../shared/ui/Feedback'
 import { Icon } from '../../shared/ui/Icon'
 import { useQueryParams } from '../../shared/hooks/useQueryParams'
 import { Card, Page, PageHeader } from '../../shared/ui/Layout'
@@ -69,7 +70,7 @@ export function UsersPage() {
       <SortSelect options={SORT_OPTIONS} {...sortProps} />
       <Card flush>
         {users.isPending ? (
-          <LoadingState />
+          <TableSkeleton rows={4} columns={4} />
         ) : users.isError ? (
           <ErrorState error={users.error} onRetry={() => users.refetch()} />
         ) : (
@@ -89,10 +90,15 @@ export function UsersPage() {
               {sorted.map((user) => (
                 <tr key={user.id} style={{ opacity: user.active ? 1 : 0.6 }}>
                   <td className={table.full}>
-                    <span className={table.primaryCell}>
-                      {user.name} {user.id === me.id && <Badge>Vos</Badge>}
+                    <span className={table.person}>
+                      <Avatar name={user.name} seed={user.id} />
+                      <span>
+                        <span className={table.primaryCell}>
+                          {user.name} {user.id === me.id && <Badge>Vos</Badge>}
+                        </span>
+                        <span className={table.secondaryText}>{user.email}</span>
+                      </span>
                     </span>
-                    <span className={table.secondaryText}>{user.email}</span>
                   </td>
                   <td data-label="Rol">{ROLE_LABELS[user.role]}</td>
                   <td data-label="Estado">

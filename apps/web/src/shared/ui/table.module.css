@@ -95,6 +95,14 @@
   }
 }
 
+/* Persona en una celda: avatar al lado del nombre. */
+.person {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
 .clickable {
   cursor: pointer;
   transition: background-color 100ms;

@@ -17,8 +17,9 @@
     background-color 120ms,
     border-color 120ms,
     color 120ms,
-    box-shadow 120ms,
-    filter 120ms;
+    box-shadow var(--duration-fast),
+    filter var(--duration-fast),
+    scale var(--duration-fast) var(--ease-out);
 }
 
 .button:disabled {
@@ -27,7 +28,7 @@
 }
 
 .button:active:not(:disabled) {
-  scale: 0.98;
+  scale: 0.97;
 }
 
 /* Acción principal: degradado índigo → violeta con un brillo suave del mismo color. */

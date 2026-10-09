@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { formatInteger, formatMoney, formatPercent } from '../../lib/format'
 import { BarList } from '../../shared/charts/BarList'
 import { type RangePreset, RANGE_PRESETS, rangeFor } from '../../shared/lib/date-range'
-import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
+import { EmptyState, ErrorState, TilesSkeleton } from '../../shared/ui/Feedback'
 import { Card, Page, PageHeader } from '../../shared/ui/Layout'
 import { SegmentedControl } from '../../shared/ui/SegmentedControl'
 import { StatTile } from '../../shared/ui/StatTile'
@@ -27,7 +27,7 @@ export function ReportsPage() {
       <SegmentedControl label="Período" value={preset} options={PRESETS} onChange={setPreset} />
 
       {report.isPending ? (
-        <LoadingState />
+        <TilesSkeleton />
       ) : report.isError ? (
         <ErrorState error={report.error} onRetry={() => report.refetch()} />
       ) : (
@@ -66,7 +66,7 @@ export function ReportsPage() {
                   data={report.data.byCategory.map((c) => ({ key: c.categoryId ?? 'none', label: c.name, value: c.revenueCents }))}
                 />
               ) : (
-                <EmptyState title="Sin ventas en el período" />
+                <EmptyState icon="chart" title="Sin ventas en el período" />
               )}
             </Card>
 
@@ -82,7 +82,7 @@ export function ReportsPage() {
                   data={report.data.byPaymentMethod.map((m) => ({ key: m.method, label: PAYMENT_METHOD_LABELS[m.method], value: m.revenueCents }))}
                 />
               ) : (
-                <EmptyState title="Sin ventas en el período" />
+                <EmptyState icon="chart" title="Sin ventas en el período" />
               )}
             </Card>
 
@@ -141,7 +141,7 @@ export function ReportsPage() {
                   </tbody>
                 </table>
               ) : (
-                <EmptyState title="Sin ventas en el período" />
+                <EmptyState icon="chart" title="Sin ventas en el período" />
               )}
             </Card>
           </div>

@@ -43,6 +43,9 @@
   --content-max: 1200px;
   --control-height: 2.5rem;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Movimiento corto y útil: lo justo para entender qué pasó, sin hacer esperar. */
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
 
   /* Colores — modo claro */
   --color-page: #f8fafc;
@@ -72,6 +75,7 @@
   /* Gráficos: barras índigo claro; la activa, en el acento. */
   --color-chart: #c7d2fe;
   --color-chart-active: #4f46e5;
+  --color-chart-active-2: #8b5cf6;
 
   /* Estados, siempre con ícono + texto */
   --color-success: #15803d;
@@ -82,13 +86,11 @@
   --color-danger-soft: #fee2e2;
   --color-danger-hover: #b91c1c;
 
-  /* Sombras suaves y difusas. Las "duras" del estilo anterior quedan neutralizadas. */
-  --color-hard-shadow: transparent;
-  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.05);
-  --shadow-md: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -8px rgb(15 23 42 / 0.12);
-  --shadow-lg: 0 24px 48px -12px rgb(15 23 42 / 0.25);
-  --shadow-hard: var(--shadow-md);
-  --shadow-hard-lg: var(--shadow-lg);
+  /* En capas: una sombra mínima pegada al borde y otra difusa más lejos, como cae la luz real. */
+  --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 8px -2px rgb(15 23 42 / 0.06), 0 12px 24px -8px rgb(15 23 42 / 0.1);
+  --shadow-lg: 0 2px 4px rgb(15 23 42 / 0.04), 0 24px 48px -12px rgb(15 23 42 / 0.28);
   --backdrop: rgb(15 23 42 / 0.45);
   --focus-ring: 0 0 0 3px rgb(99 102 241 / 0.3);
 }
@@ -118,6 +120,7 @@
     --gradient-text: linear-gradient(90deg, #818cf8, #c084fc 60%, #f472b6);
     --color-chart: #3730a3;
     --color-chart-active: #818cf8;
+    --color-chart-active-2: #c084fc;
     --color-success: #4ade80;
     --color-success-soft: #052e1a;
     --color-warning: #fcd34d;
@@ -125,6 +128,7 @@
     --color-danger: #f87171;
     --color-danger-soft: #3b1219;
     --color-danger-hover: #fca5a5;
+    --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.25);
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
     --shadow-md: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.5);
     --shadow-lg: 0 24px 48px -12px rgb(0 0 0 / 0.6);
@@ -161,6 +165,7 @@
   --gradient-text: linear-gradient(90deg, #818cf8, #c084fc 60%, #f472b6);
   --color-chart: #3730a3;
   --color-chart-active: #818cf8;
+  --color-chart-active-2: #c084fc;
   --color-success: #4ade80;
   --color-success-soft: #052e1a;
   --color-warning: #fcd34d;
@@ -168,6 +173,7 @@
   --color-danger: #f87171;
   --color-danger-soft: #3b1219;
   --color-danger-hover: #fca5a5;
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.25);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
   --shadow-md: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.5);
   --shadow-lg: 0 24px 48px -12px rgb(0 0 0 / 0.6);

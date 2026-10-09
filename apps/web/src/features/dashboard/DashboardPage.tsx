@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { formatInteger, formatLongDate, formatMoney } from '../../lib/format'
 import { Button } from '../../shared/ui/Button'
-import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/Feedback'
+import { EmptyState, ErrorState, Skeleton, TilesSkeleton } from '../../shared/ui/Feedback'
 import { Card, Page, PageHeader } from '../../shared/ui/Layout'
 import { StatTile } from '../../shared/ui/StatTile'
 import { useCurrentUser } from '../auth/AuthProvider'
@@ -30,6 +30,15 @@ export function DashboardPage() {
   const today = toLocalIsoDate(now)
   const lastTwoWeeks = useSalesReport({ from: addDays(today, -13), to: today })
 
+  // Tendencias de los últimos 7 días para los mini gráficos (salen del mismo reporte del gráfico).
+  const week = lastTwoWeeks.data?.daily.slice(-7) ?? []
+  const trend = {
+    revenue: week.map((d) => d.revenueCents),
+    tickets: week.map((d) => d.salesCount),
+    average: week.map((d) => (d.salesCount ? d.revenueCents / d.salesCount : 0)),
+    profit: week.map((d) => d.profitCents),
+  }
+
   return (
     <Page>
       <PageHeader
@@ -43,7 +52,7 @@ export function DashboardPage() {
       />
 
       {dashboard.isPending ? (
-        <LoadingState />
+        <TilesSkeleton />
       ) : dashboard.isError ? (
         <ErrorState error={dashboard.error} onRetry={() => dashboard.refetch()} />
       ) : (
@@ -55,22 +64,43 @@ export function DashboardPage() {
               value={formatMoney(dashboard.data.today.revenueCents, { compact: true })}
               delta={percentChange(dashboard.data.today.revenueCents, dashboard.data.yesterday.revenueCents)}
               deltaLabel="vs. ayer a esta hora"
+              trend={trend.revenue}
             />
             <StatTile
               label="Tickets"
               value={formatInteger(dashboard.data.today.salesCount)}
-              hint={`Ayer a esta hora: ${dashboard.data.yesterday.salesCount}`}
+              delta={percentChange(dashboard.data.today.salesCount, dashboard.data.yesterday.salesCount)}
+              deltaLabel={`vs. ${dashboard.data.yesterday.salesCount} ayer`}
+              trend={trend.tickets}
             />
-            <StatTile label="Ticket promedio" value={formatMoney(dashboard.data.today.averageTicketCents, { compact: true })} />
+            <StatTile
+              label="Ticket promedio"
+              value={formatMoney(dashboard.data.today.averageTicketCents, { compact: true })}
+              delta={
+                dashboard.data.yesterday.salesCount
+                  ? percentChange(
+                      dashboard.data.today.averageTicketCents,
+                      dashboard.data.yesterday.revenueCents / dashboard.data.yesterday.salesCount,
+                    )
+                  : null
+              }
+              deltaLabel="vs. ayer"
+              trend={trend.average}
+            />
             {dashboard.data.today.profitCents !== undefined && (
-              <StatTile label="Ganancia bruta de hoy" value={formatMoney(dashboard.data.today.profitCents, { compact: true })} />
+              <StatTile
+                label="Ganancia bruta de hoy"
+                value={formatMoney(dashboard.data.today.profitCents, { compact: true })}
+                hint="Últimos 7 días"
+                trend={trend.profit}
+              />
             )}
           </div>
 
           <div className={styles.grid}>
             <Card title="Últimos 14 días">
               {lastTwoWeeks.isPending ? (
-                <LoadingState />
+                <Skeleton height="13.75rem" />
               ) : lastTwoWeeks.isError ? (
                 <ErrorState error={lastTwoWeeks.error} onRetry={() => lastTwoWeeks.refetch()} />
               ) : (
