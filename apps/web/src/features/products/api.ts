@@ -2,6 +2,8 @@ import {
   type CategoryDto,
   type CategoryInput,
   type CreateProductInput,
+  type InventoryCountPreviewDto,
+  type InventoryCountResultDto,
   PRODUCT_CSV_HEADERS as H,
   type Paginated,
   type PriceChangeDto,
@@ -147,4 +149,21 @@ export function downloadImportTemplate() {
   const header = csvHeader(Object.values(H).map((name) => ({ header: name, value: () => null })))
   const example = csvRow(['REM-01', '7790001234567', 'Remera negra · M', 'Remeras', csvMoney(2_000_000), csvMoney(3_990_000), 10, 2, true])
   saveFile(new Blob([header + example], { type: 'text/csv;charset=utf-8' }), 'plantilla-productos.csv')
+}
+
+/** Planilla de conteo con los mismos filtros que la lista: se puede contar por categoría o solo lo de stock bajo. */
+export function downloadCountSheet({ q, stock, categoryId, status }: ProductFilters) {
+  return downloadFile('/products/count-sheet', { query: { q, stock, categoryId, status } })
+}
+
+export function previewInventoryCount(file: File) {
+  return api<InventoryCountPreviewDto>('/products/count/preview', { method: 'POST', body: asCsv(file) })
+}
+
+export function useApplyInventoryCount() {
+  const invalidate = useInvalidateProducts()
+  return useMutation({
+    mutationFn: (file: File) => api<InventoryCountResultDto>('/products/count', { method: 'POST', body: asCsv(file) }),
+    onSuccess: invalidate,
+  })
 }

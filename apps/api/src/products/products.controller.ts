@@ -5,6 +5,8 @@ import {
   type CreateProduct,
   type Paginated,
   type ProductDto,
+  type InventoryCountPreviewDto,
+  type InventoryCountResultDto,
   type ProductExportQuery,
   type ProductImportPreviewDto,
   type ProductImportResultDto,
@@ -20,6 +22,8 @@ import type { RequestUser } from '../auth/auth.types'
 import { AppError } from '../common/app-error'
 import { CurrentUser, RequirePermissions } from '../auth/decorators'
 import { ApiZodBody, ApiZodQuery, ZodBody, ZodQuery } from '../common/zod'
+import { InventoryCountService } from './inventory-count.service'
+import { COUNT_SHEET_COLUMNS } from './product.csv'
 import { decodeCsv } from './product-import'
 import { ProductImportService } from './product-import.service'
 import { ProductsService } from './products.service'
@@ -31,6 +35,7 @@ export class ProductsController {
   constructor(
     private readonly products: ProductsService,
     private readonly imports: ProductImportService,
+    private readonly counts: InventoryCountService,
   ) {}
 
   @Get()
@@ -62,7 +67,43 @@ export class ProductsController {
     })
   }
 
-  /** Revisa un CSV de productos nuevos y devuelve qué pasaría al importarlo. No guarda nada. */
+  /** Planilla para contar la mercadería: SKU, nombre, categoría, stock del sistema y una columna vacía "Contado". */
+  @Get('count-sheet')
+  @RequirePermissions('stock:adjust')
+  @ApiZodQuery(productExportQuerySchema)
+  @ApiProduces('text/csv')
+  @Header('Cache-Control', 'no-store')
+  countSheet(
+    @CurrentUser() user: RequestUser,
+    @ZodQuery(productExportQuerySchema) query: ProductExportQuery,
+  ): StreamableFile {
+    const filename = `conteo-${toLocalIsoDate(new Date())}.csv`
+    return new StreamableFile(Readable.from(this.products.exportCsv(user, query, COUNT_SHEET_COLUMNS)), {
+      type: 'text/csv; charset=utf-8',
+      disposition: `attachment; filename="${filename}"`,
+    })
+  }
+
+  /** Revisa una planilla de conteo: diferencias por producto y movimientos posteriores a la descarga. No guarda nada. */
+  @Post('count/preview')
+  @HttpCode(200)
+  @RequirePermissions('stock:adjust')
+  @ApiConsumes('text/csv')
+  @ApiBody({ schema: { type: 'string', format: 'binary' } })
+  previewCount(@CurrentUser() user: RequestUser, @Body() body: unknown): Promise<InventoryCountPreviewDto> {
+    return this.counts.preview(user, csvText(body))
+  }
+
+  /** Aplica la planilla de conteo: cada diferencia queda como movimiento "conteo". Todo o nada. */
+  @Post('count')
+  @RequirePermissions('stock:adjust')
+  @ApiConsumes('text/csv')
+  @ApiBody({ schema: { type: 'string', format: 'binary' } })
+  applyCount(@CurrentUser() user: RequestUser, @Body() body: unknown): Promise<InventoryCountResultDto> {
+    return this.counts.apply(user, csvText(body))
+  }
+
+  /** Revisa un CSV de productos (crea los SKU nuevos y actualiza los existentes) y devuelve qué pasaría. No guarda nada. */
   @Post('import/preview')
   @HttpCode(200)
   @RequirePermissions('products:write')
